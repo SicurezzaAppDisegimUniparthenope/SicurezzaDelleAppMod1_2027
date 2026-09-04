@@ -145,7 +145,8 @@ $Append = "root=/dev/vda1"
 $DisplayArgs = @()
 if (-not $Gui) {
     $DisplayArgs = @("-nographic")
-    $Append = "root=/dev/vda1 console=ttyS0"
+    $ConsoleDev = if ($Arch -eq "arm64") { "ttyAMA0" } else { "ttyS0" }
+    $Append = "root=/dev/vda1 console=$ConsoleDev"
 }
 
 $AccelArgs = @()
@@ -164,16 +165,26 @@ Write-Host "==> Avvio Phoenix in modalita' $(if ($Gui) {'GUI'} else {'headless'}
 Write-Host "==> Una volta avviata: ssh -p $Port user@127.0.0.1   (password: user)"
 if (-not $Gui) { Write-Host "==> (headless: per uscire dalla console seriale usa Ctrl-A poi X)" }
 
-& $QemuExe @MachineArgs @AccelArgs @CpuArgs `
-    -kernel $Kernel.FullName `
-    -initrd $Initrd.FullName `
-    -append $Append `
-    -m $Mem `
-    -netdev "user,id=unet,hostfwd=tcp:127.0.0.1:$Port-:22" `
-    -device virtio-net,netdev=unet `
-    -drive "file=$($Disk.FullName),if=virtio,format=qcow2,index=0" `
-    @DisplayArgs
-$QemuExitCode = $LASTEXITCODE
+function Invoke-Qemu($ExtraArgs) {
+    & $QemuExe @MachineArgs @ExtraArgs `
+        -kernel $Kernel.FullName `
+        -initrd $Initrd.FullName `
+        -append $Append `
+        -m $Mem `
+        -netdev "user,id=unet,hostfwd=tcp:127.0.0.1:$Port-:22" `
+        -device virtio-net,netdev=unet `
+        -drive "file=$($Disk.FullName),if=virtio,format=qcow2,index=0" `
+        @DisplayArgs
+    return $LASTEXITCODE
+}
+
+$Status = Invoke-Qemu ($AccelArgs + $CpuArgs)
+if ($Status -ne 0 -and $AccelArgs.Count -gt 0) {
+    Write-Warning "QEMU si e' interrotto subito dopo l'avvio con l'accelerazione hardware (WHPX) attiva."
+    Write-Warning "Riprovo senza accelerazione hardware (emulazione via TCG, piu' lenta)..."
+    $FallbackCpuArgs = if ($Arch -eq "arm64") { @("-cpu", "cortex-a57") } else { @() }
+    $Status = Invoke-Qemu $FallbackCpuArgs
+}
 
 try { Stop-Transcript | Out-Null } catch {}
-exit $QemuExitCode
+exit $Status

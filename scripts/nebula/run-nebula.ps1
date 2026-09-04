@@ -132,14 +132,23 @@ Write-Host "==> Avvio Nebula in modalita' $(if ($Gui) {'GUI'} else {'headless'})
 Write-Host "==> Attendere il boot, poi: ssh -p $Port level00@127.0.0.1   (password: level00)"
 if (-not $Gui) { Write-Host "==> (headless: per uscire dalla console usa Ctrl-A poi X)" }
 
-& $QemuExe @AccelArgs `
-    -m $Mem `
-    -cdrom $IsoPath `
-    -boot d `
-    -netdev "user,id=n0,hostfwd=tcp:127.0.0.1:$Port-:22" `
-    -device "$NicModel,netdev=n0" `
-    @DisplayArgs
-$QemuExitCode = $LASTEXITCODE
+function Invoke-Qemu($ExtraArgs) {
+    & $QemuExe @ExtraArgs `
+        -m $Mem `
+        -cdrom $IsoPath `
+        -boot d `
+        -netdev "user,id=n0,hostfwd=tcp:127.0.0.1:$Port-:22" `
+        -device "$NicModel,netdev=n0" `
+        @DisplayArgs
+    return $LASTEXITCODE
+}
+
+$Status = Invoke-Qemu $AccelArgs
+if ($Status -ne 0 -and $AccelArgs.Count -gt 0) {
+    Write-Warning "QEMU si e' interrotto subito dopo l'avvio con l'accelerazione hardware (WHPX) attiva."
+    Write-Warning "Riprovo senza accelerazione hardware (emulazione via TCG, piu' lenta)..."
+    $Status = Invoke-Qemu @()
+}
 
 try { Stop-Transcript | Out-Null } catch {}
-exit $QemuExitCode
+exit $Status
