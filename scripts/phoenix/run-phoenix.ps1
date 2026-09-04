@@ -42,6 +42,16 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$LogDir = Join-Path $PSScriptRoot "logs"
+New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+$LogFile = Join-Path $LogDir "phoenix-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
+try {
+    Start-Transcript -Path $LogFile -Append | Out-Null
+    Write-Host "==> Log dettagliato salvato in: $LogFile"
+} catch {
+    Write-Warning "Impossibile avviare il log su file: $_"
+}
+
 $PhoenixVersion = "v1.0.0-alpha-3"
 $InstallDir = Join-Path $env:USERPROFILE ".exploit-education\phoenix"
 New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
@@ -163,3 +173,7 @@ if (-not $Gui) { Write-Host "==> (headless: per uscire dalla console seriale usa
     -device virtio-net,netdev=unet `
     -drive "file=$($Disk.FullName),if=virtio,format=qcow2,index=0" `
     @DisplayArgs
+$QemuExitCode = $LASTEXITCODE
+
+try { Stop-Transcript | Out-Null } catch {}
+exit $QemuExitCode

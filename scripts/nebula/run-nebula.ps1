@@ -43,6 +43,16 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$LogDir = Join-Path $PSScriptRoot "logs"
+New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+$LogFile = Join-Path $LogDir "nebula-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
+try {
+    Start-Transcript -Path $LogFile -Append | Out-Null
+    Write-Host "==> Log dettagliato salvato in: $LogFile"
+} catch {
+    Write-Warning "Impossibile avviare il log su file: $_"
+}
+
 $NebulaVersion = "v5.0.0"
 $IsoName = "exploit-exercises-nebula-5.iso"
 $IsoSha1 = "e82f807be06100bf3e048f82e899fb1fecc24e3a"
@@ -129,3 +139,7 @@ if (-not $Gui) { Write-Host "==> (headless: per uscire dalla console usa Ctrl-A 
     -netdev "user,id=n0,hostfwd=tcp:127.0.0.1:$Port-:22" `
     -device "$NicModel,netdev=n0" `
     @DisplayArgs
+$QemuExitCode = $LASTEXITCODE
+
+try { Stop-Transcript | Out-Null } catch {}
+exit $QemuExitCode
