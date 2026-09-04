@@ -31,3 +31,4 @@ extracted-*/
 *.log
 *.tmp
 logs/
+debug/
