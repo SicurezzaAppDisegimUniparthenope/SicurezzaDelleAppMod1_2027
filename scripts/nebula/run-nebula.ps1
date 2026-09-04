@@ -134,11 +134,19 @@ if (-not $Gui) { Write-Host "==> (headless: per uscire dalla console usa Ctrl-A 
 
 function Invoke-Qemu($ExtraArgs) {
     # Start-Transcript non cattura l'output nativo di QEMU (console diretta):
-    # lo catturiamo esplicitamente qui. ErrorActionPreference locale a
-    # 'Continue' perche' con 'Stop' anche un semplice avviso su stderr di un
-    # eseguibile nativo farebbe terminare lo script in modo silenzioso.
+    # lo catturiamo esplicitamente con Tee-Object sullo stesso file di log.
+    # Va pero' messo in pausa Start-Transcript per quella durata: i due
+    # cmdlet non possono scrivere sullo stesso file contemporaneamente
+    # (Windows lo blocca con "the process cannot access the file").
+    # ErrorActionPreference locale a 'Continue' perche' con 'Stop' anche un
+    # semplice avviso su stderr di un eseguibile nativo farebbe terminare lo
+    # script in modo silenzioso. Il risultato di Tee-Object va a sua volta
+    # in Out-Host (non lasciato "cadere" implicitamente): altrimenti
+    # PowerShell lo raccoglierebbe come output della funzione insieme a
+    # $LASTEXITCODE, corrompendo il valore restituito a chi chiama.
     $PrevEAP = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
+    try { Stop-Transcript | Out-Null } catch {}
     try {
         & $QemuExe @ExtraArgs `
             -m $Mem `
@@ -146,9 +154,10 @@ function Invoke-Qemu($ExtraArgs) {
             -boot d `
             -netdev "user,id=n0,hostfwd=tcp:127.0.0.1:$Port-:22" `
             -device "$NicModel,netdev=n0" `
-            @DisplayArgs 2>&1 | Tee-Object -FilePath $LogFile -Append
+            @DisplayArgs 2>&1 | Tee-Object -FilePath $LogFile -Append | Out-Host
     } finally {
         $ErrorActionPreference = $PrevEAP
+        try { Start-Transcript -Path $LogFile -Append | Out-Null } catch {}
     }
     return $LASTEXITCODE
 }
