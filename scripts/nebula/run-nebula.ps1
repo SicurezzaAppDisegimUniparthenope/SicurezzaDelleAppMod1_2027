@@ -133,13 +133,23 @@ Write-Host "==> Attendere il boot, poi: ssh -p $Port level00@127.0.0.1   (passwo
 if (-not $Gui) { Write-Host "==> (headless: per uscire dalla console usa Ctrl-A poi X)" }
 
 function Invoke-Qemu($ExtraArgs) {
-    & $QemuExe @ExtraArgs `
-        -m $Mem `
-        -cdrom $IsoPath `
-        -boot d `
-        -netdev "user,id=n0,hostfwd=tcp:127.0.0.1:$Port-:22" `
-        -device "$NicModel,netdev=n0" `
-        @DisplayArgs
+    # Start-Transcript non cattura l'output nativo di QEMU (console diretta):
+    # lo catturiamo esplicitamente qui. ErrorActionPreference locale a
+    # 'Continue' perche' con 'Stop' anche un semplice avviso su stderr di un
+    # eseguibile nativo farebbe terminare lo script in modo silenzioso.
+    $PrevEAP = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        & $QemuExe @ExtraArgs `
+            -m $Mem `
+            -cdrom $IsoPath `
+            -boot d `
+            -netdev "user,id=n0,hostfwd=tcp:127.0.0.1:$Port-:22" `
+            -device "$NicModel,netdev=n0" `
+            @DisplayArgs 2>&1 | Tee-Object -FilePath $LogFile -Append
+    } finally {
+        $ErrorActionPreference = $PrevEAP
+    }
     return $LASTEXITCODE
 }
 

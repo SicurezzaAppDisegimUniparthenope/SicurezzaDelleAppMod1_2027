@@ -166,15 +166,25 @@ Write-Host "==> Una volta avviata: ssh -p $Port user@127.0.0.1   (password: user
 if (-not $Gui) { Write-Host "==> (headless: per uscire dalla console seriale usa Ctrl-A poi X)" }
 
 function Invoke-Qemu($ExtraArgs) {
-    & $QemuExe @MachineArgs @ExtraArgs `
-        -kernel $Kernel.FullName `
-        -initrd $Initrd.FullName `
-        -append $Append `
-        -m $Mem `
-        -netdev "user,id=unet,hostfwd=tcp:127.0.0.1:$Port-:22" `
-        -device virtio-net,netdev=unet `
-        -drive "file=$($Disk.FullName),if=virtio,format=qcow2,index=0" `
-        @DisplayArgs
+    # Start-Transcript non cattura l'output nativo di QEMU (console diretta):
+    # lo catturiamo esplicitamente qui. ErrorActionPreference locale a
+    # 'Continue' perche' con 'Stop' anche un semplice avviso su stderr di un
+    # eseguibile nativo farebbe terminare lo script in modo silenzioso.
+    $PrevEAP = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        & $QemuExe @MachineArgs @ExtraArgs `
+            -kernel $Kernel.FullName `
+            -initrd $Initrd.FullName `
+            -append $Append `
+            -m $Mem `
+            -netdev "user,id=unet,hostfwd=tcp:127.0.0.1:$Port-:22" `
+            -device virtio-net,netdev=unet `
+            -drive "file=$($Disk.FullName),if=virtio,format=qcow2,index=0" `
+            @DisplayArgs 2>&1 | Tee-Object -FilePath $LogFile -Append
+    } finally {
+        $ErrorActionPreference = $PrevEAP
+    }
     return $LASTEXITCODE
 }
 
