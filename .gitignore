@@ -1,0 +1,32 @@
+# Note/contesto locali, non destinate al repository pubblico
+TODO.md
+CLAUDE.md
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Artefatti VM scaricati/estratti dagli script (qualora finissero nel repo
+# invece che in ~/.exploit-education/)
+*.qcow2
+*.iso
+*.tar.xz
+*.part
+extracted-*/
+.exploit-education/
+
+# Log e file temporanei
+*.log
+*.tmp
