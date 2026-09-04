@@ -61,6 +61,17 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOG_DIR="$SCRIPT_DIR/logs"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/nebula-$(date +%Y%m%d-%H%M%S).log"
+exec > >(tee -a "$LOG_FILE") 2>&1
+exec 19>>"$LOG_FILE"
+BASH_XTRACEFD=19
+PS4='+ [${SECONDS}s] '
+set -x
+echo "==> Log dettagliato salvato in: $LOG_FILE"
+
 OS="$(uname -s)"
 HOST_ARCH_RAW="$(uname -m)"
 NATIVE=0
@@ -79,8 +90,17 @@ install_qemu() {
   echo "==> Installazione di QEMU..."
   if [[ "$OS" == "Darwin" ]]; then
     if ! command -v brew >/dev/null 2>&1; then
-      echo "Homebrew non trovato. Installalo da https://brew.sh e rilancia lo script." >&2
-      exit 1
+      echo "==> Homebrew non trovato: installazione in corso..."
+      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      if [[ -x /opt/homebrew/bin/brew ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      elif [[ -x /usr/local/bin/brew ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+      fi
+      if ! command -v brew >/dev/null 2>&1; then
+        echo "Installazione di Homebrew non riuscita. Installalo manualmente da https://brew.sh e rilancia lo script." >&2
+        exit 1
+      fi
     fi
     brew install qemu
   elif [[ "$OS" == "Linux" ]]; then
@@ -161,11 +181,31 @@ echo "==> Avvio Nebula in modalita' $( [[ $HEADLESS -eq 1 ]] && echo headless ||
 echo "==> Attendere il boot, poi: ssh -p $SSH_PORT level00@127.0.0.1   (password: level00)"
 [[ "$HEADLESS" -eq 1 ]] && echo "==> (headless: per uscire dalla console usa Ctrl-A poi X)"
 
-exec "$QEMU_BIN" \
-  "${ACCEL_ARGS[@]}" \
-  -m "$MEM" \
-  -cdrom "$ISO_NAME" \
-  -boot d \
-  -netdev "user,id=n0,hostfwd=tcp:127.0.0.1:${SSH_PORT}-:22" \
-  -device "${NIC_MODEL},netdev=n0" \
-  "${DISPLAY_ARGS[@]}"
+run_qemu() {
+  "$QEMU_BIN" \
+    "$@" \
+    -m "$MEM" \
+    -cdrom "$ISO_NAME" \
+    -boot d \
+    -netdev "user,id=n0,hostfwd=tcp:127.0.0.1:${SSH_PORT}-:22" \
+    -device "${NIC_MODEL},netdev=n0" \
+    "${DISPLAY_ARGS[@]+"${DISPLAY_ARGS[@]}"}"
+}
+
+set +e
+run_qemu "${ACCEL_ARGS[@]+"${ACCEL_ARGS[@]}"}"
+STATUS=$?
+set -e
+
+if [[ $STATUS -ne 0 && ${#ACCEL_ARGS[@]} -gt 0 ]]; then
+  echo "==> QEMU si e' interrotto subito dopo l'avvio con l'accelerazione hardware attiva." >&2
+  echo "    Su alcune versioni recenti/beta di macOS l'Hypervisor.framework rifiuta il" >&2
+  echo "    binario QEMU installato da Homebrew (entitlement non riconosciuto)." >&2
+  echo "    Fix permanente: vedi la sezione 'Problemi comuni' nel README (ri-firma di" >&2
+  echo "    qemu con l'entitlement com.apple.security.hypervisor)." >&2
+  echo "==> Riprovo senza accelerazione hardware (emulazione via TCG, piu' lenta)..." >&2
+  run_qemu
+  STATUS=$?
+fi
+
+exit "$STATUS"

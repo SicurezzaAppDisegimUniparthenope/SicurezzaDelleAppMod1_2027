@@ -22,8 +22,12 @@ scripts/
 
 ## Prerequisiti
 
-- **macOS / Linux**: `bash`, `curl`, `tar`. Homebrew (macOS) o un package
-  manager supportato (Linux) per l'installazione automatica di QEMU.
+- **macOS / Linux**: `bash`, `curl`, `tar`. Su macOS non serve installare
+  Homebrew a mano: se assente, lo script lo installa automaticamente (script
+  ufficiale da [brew.sh](https://brew.sh)) prima di usarlo per installare
+  QEMU — verrà chiesta la password amministratore. Su Linux serve un package
+  manager supportato (apt, dnf/yum, pacman, zypper) per l'installazione
+  automatica di QEMU.
 - **Windows**: PowerShell 5.1+ (incluso in Windows 10/11), `tar` (incluso di
   default da Windows 10 1803+). [winget](https://learn.microsoft.com/it-it/windows/package-manager/winget/)
   o [Chocolatey](https://chocolatey.org/) per l'installazione automatica di
@@ -35,6 +39,16 @@ scripts/
 Gli script vanno eseguiti **individualmente da ogni studente sulla propria
 macchina** — non richiedono clonare il repository con permessi speciali, solo
 gli script stessi.
+
+## Log
+
+Ogni esecuzione degli script bash (macOS/Linux) scrive un log dettagliato
+(tutto l'output a schermo più la traccia dei comandi eseguiti) in una
+cartella `logs/` creata accanto allo script stesso
+(`scripts/phoenix/logs/phoenix-AAAAMMGG-HHMMSS.log`,
+`scripts/nebula/logs/nebula-AAAAMMGG-HHMMSS.log`). Utile per diagnosticare un
+problema (es. da allegare quando si chiede supporto). I file `*.log` sono
+esclusi dal repository via `.gitignore`.
 
 ## Phoenix
 
@@ -60,6 +74,16 @@ chmod +x scripts/phoenix/run-phoenix.sh   # solo la prima volta
 > `powershell -ExecutionPolicy Bypass -File .\scripts\phoenix\run-phoenix.ps1`.
 
 ### Accesso
+
+In modalità `--headless` (default) il log di boot scorre direttamente nel
+terminale: la VM è pronta quando compare il prompt di login, es.:
+
+```
+Phoenix - brought to you by https://exploit.education/phoenix/
+phoenix-arm64 login:
+```
+
+A quel punto, da un altro terminale:
 
 ```bash
 ssh -p 2222 user@127.0.0.1     # password: user
@@ -153,6 +177,24 @@ terminale. Per terminare QEMU: premi `Ctrl-A` seguito da `X`. In alternativa,
 lavora sempre via SSH in un altro terminale e chiudi quello con QEMU con
 `Ctrl-C`.
 
+> **Nebula: non usare `sudo shutdown -h now` (o `poweroff`/`halt`) dentro la
+> VM per terminare la sessione.** Il kernel Linux i386 della ISO Nebula (del
+> 2010) non invia a QEMU il segnale ACPI di spegnimento: il sistema operativo
+> si ferma ma il processo QEMU resta acceso "a vuoto", inutilizzabile (SSH
+> non risponde più e sulla console/nel log compaiono ripetuti
+> `Slirp: Failed to send packet, ret: -1`). Per terminare la sessione usa
+> sempre `Ctrl-C` nel terminale dello script (o `Ctrl-A` poi `X` come sopra).
+> Se ti ritrovi già in questa situazione, individua e chiudi il processo
+> rimasto appeso:
+>
+> ```bash
+> pkill -f qemu-system-i386
+> ```
+>
+> Su Phoenix questo problema non si presenta: l'immagine ufficiale ha un
+> kernel moderno con supporto ACPI corretto, quindi `shutdown -h now` fa
+> terminare QEMU regolarmente.
+
 ## Problemi comuni
 
 - **Il download si interrompe**: rilanciare semplicemente lo script — i file
@@ -166,3 +208,7 @@ lavora sempre via SSH in un altro terminale e chiudi quello con QEMU con
 - **Windows Defender / SmartScreen blocca lo script**: click destro sul file
   `.ps1` → Proprietà → "Sblocca", oppure usa il flag `-ExecutionPolicy Bypass`
   indicato sopra.
+- **macOS, primo avvio senza Homebrew**: lo script installa Homebrew da solo
+  ed è normale che l'installazione richieda un paio di minuti e la password
+  dell'utente (necessaria a `sudo` per completare il setup). I run successivi
+  non ripetono questo passaggio.

@@ -30,3 +30,4 @@ extracted-*/
 # Log e file temporanei
 *.log
 *.tmp
+logs/
