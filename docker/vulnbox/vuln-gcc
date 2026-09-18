@@ -1,0 +1,5 @@
+#!/bin/sh
+# Wrapper gcc con le protezioni tipicamente disattivate negli esempi delle
+# slide (stack canary, NX, PIE) e target a 32 bit (-m32), come nelle
+# slide (registri EAX/EBX, syscall int 0x80). Uso: vuln-gcc -o prog prog.c
+exec gcc -m32 -g -fno-stack-protector -z execstack -no-pie "$@"

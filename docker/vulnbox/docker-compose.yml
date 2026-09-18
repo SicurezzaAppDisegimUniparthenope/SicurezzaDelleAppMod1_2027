@@ -1,0 +1,14 @@
+services:
+  vulnbox:
+    build: .
+    platform: linux/amd64
+    container_name: vulnbox
+    hostname: vulnbox
+    ports:
+      - "127.0.0.1:2201:22"
+    volumes:
+      - ./src:/home/student/src
+      - ./solutions:/home/vulnbox/solutions
+    cap_add:
+      - SYS_PTRACE   # richiesto da gdb (ptrace) dentro il container
+    restart: unless-stopped

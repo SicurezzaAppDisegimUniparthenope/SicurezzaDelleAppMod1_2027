@@ -1,0 +1,7 @@
+#!/bin/sh
+# Esegue un comando con ASLR disattivato solo per quel processo
+# (personality ADDR_NO_RANDOMIZE via setarch), senza toccare /proc/sys
+# a livello di container/host. Utile per rendere ripetibili gli indirizzi
+# usati negli esempi return-to-libc/ROP/JOP.
+# Uso: run-noaslr ./prog arg1 arg2
+exec setarch "$(uname -m)" -R "$@"
