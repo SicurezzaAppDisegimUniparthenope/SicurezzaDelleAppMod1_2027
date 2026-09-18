@@ -1,9 +1,11 @@
-# Sicurezza delle Applicazioni Modulo 1 — Phoenix & Nebula via QEMU
+# Sicurezza delle Applicazioni Modulo 1
 
-Script per avviare in locale le VM didattiche di [exploit.education](https://exploit.education)
+Materiale per le esercitazioni pratiche del corso: un container Docker
+(**vulnbox**) con gli esempi vulnerabili delle slide, e script per avviare
+in locale le VM didattiche di [exploit.education](https://exploit.education)
 (**Phoenix** e **Nebula**) tramite QEMU, senza dover installare manualmente
-VirtualBox/VMware. Ogni script installa QEMU se manca, scarica l'immagine
-ufficiale e avvia la VM con il forwarding SSH già configurato.
+VirtualBox/VMware. Ogni script QEMU installa QEMU se manca, scarica
+l'immagine ufficiale e avvia la VM con il forwarding SSH già configurato.
 
 Compatibili con **macOS (Intel e Apple Silicon)**, **Linux** (distro apt,
 dnf/yum, pacman, zypper) e **Windows**.
@@ -11,6 +13,9 @@ dnf/yum, pacman, zypper) e **Windows**.
 ## Struttura
 
 ```
+docker/
+  vulnbox/             # esempi delle slide (memory corruption, format
+                        # string, ROP, static/dynamic analysis, contromisure)
 scripts/
   phoenix/
     run-phoenix.sh    # macOS + Linux
@@ -20,7 +25,28 @@ scripts/
     run-nebula.ps1      # Windows
 ```
 
-## Prerequisiti
+## vulnbox (Docker)
+
+Container Debian con gli esempi C delle slide del corso (memory corruption,
+format string, return-to-libc/ROP, static/dynamic analysis, contromisure —
+NX, stack canary, ASLR): a differenza di Phoenix/Nebula, non è
+exploit.education ma materiale specifico di questo corso, pensato per
+esercitarsi in aula insieme al docente.
+
+Non serve clonare il repo né buildare nulla: l'immagine è pubblicata su
+GitHub Container Registry.
+
+```bash
+docker pull ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:latest
+docker run -d --name vulnbox -p 127.0.0.1:2201:22 --cap-add=SYS_PTRACE \
+    ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:latest
+ssh -p 2201 student@localhost   # password: student
+```
+
+Dettagli, credenziali, elenco esempi e limiti noti (es. `ptrace`/gdb live
+sotto emulazione su Apple Silicon) in [`docker/vulnbox/README.md`](docker/vulnbox/README.md).
+
+## Prerequisiti (Phoenix / Nebula via QEMU)
 
 - **macOS / Linux**: `bash`, `curl`, `tar`. Su macOS non serve installare
   Homebrew a mano: se assente, lo script lo installa automaticamente (script
@@ -40,7 +66,7 @@ Gli script vanno eseguiti **individualmente da ogni studente sulla propria
 macchina** — non richiedono clonare il repository con permessi speciali, solo
 gli script stessi.
 
-## Log
+## Log (Phoenix / Nebula via QEMU)
 
 Ogni esecuzione degli script bash (macOS/Linux) scrive un log dettagliato
 (tutto l'output a schermo più la traccia dei comandi eseguiti) in una
