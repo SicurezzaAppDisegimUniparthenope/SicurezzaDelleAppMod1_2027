@@ -1,0 +1,7 @@
+#!/bin/sh
+# Variante di vuln-gcc che compila esplicitamente la variante a 64 bit
+# (utile su amd64, dove vuln-gcc resta a 32 bit per compatibilità con gli
+# esempi storici delle slide; su arm64 è equivalente a vuln-gcc, dato che
+# l'unica bitness disponibile è già 64). Uso: vuln-gcc64 -o prog-64 prog.c
+CC="$(cat /etc/vulnbox-cc64)"
+exec $CC -g -fno-stack-protector -z execstack -no-pie "$@"

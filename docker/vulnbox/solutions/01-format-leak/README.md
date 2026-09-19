@@ -1,6 +1,6 @@
 # 01 — Format string: leak (`leak`)
 
-Sorgente: `src/01-format-leak/leak.c` — binario compilato in `~student/bin/leak`.
+Sorgente: `src/01-format-leak/leak.c` — binario compilato in `~student/bin/i386/leak`.
 Legge l'input da **stdin** (non da `argv`, per poter includere in seguito
 anche byte nulli negli altri esercizi — vedi nota in cima al sorgente):
 
@@ -50,3 +50,18 @@ stampando i primi N valori dello stack in esadecimale).
 ```sh
 python3 exploit.py
 ```
+
+## Variante amd64-64 bit (`exploit-x64.py`, `~student/bin/x64/leak`)
+
+Stessa idea, con `%lx` (8 byte) al posto di `%x` (4 byte): su amd64 i
+primi argomenti variadic di `printf` vengono letti dai registri
+(RSI/RDX/RCX/R8/R9), non tutti dallo stack come su i386, ma il fenomeno
+dimostrato è identico — printf continua a "consumare" argomenti
+inesistenti (prima dai registri, poi dallo stack).
+
+## Variante arm64 (`exploit-arm64.py`, `~student/bin/arm64/leak`)
+
+Identica alla variante x64 (stesso `%lx`): la AAPCS64 legge i primi
+argomenti variadic da X1-X7 (X0 è il puntatore al formato), poi dallo
+stack — un registro in più rispetto ad amd64 prima di ricadere sullo
+stack, nessun'altra differenza pratica.

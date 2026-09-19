@@ -2,8 +2,8 @@
 
 Sorgente: `src/11-countermeasure-nx/vuln.c` — **stesso** sorgente dello
 shellcode injection (esempio 08), compilato due volte da `build.sh`:
-`~student/bin/vuln-nx-off` (stack eseguibile, come l'esempio 07/08) e
-`~student/bin/vuln-nx-on` (stack non eseguibile) — slide SS_2.4, 6-11.
+`~student/bin/i386/vuln-nx-off` (stack eseguibile, come l'esempio 07/08) e
+`~student/bin/i386/vuln-nx-on` (stack non eseguibile) — slide SS_2.4, 6-11.
 
 ## Dimostrazione in aula
 
@@ -18,8 +18,8 @@ shellcode injection (esempio 08), compilato due volte da `build.sh`:
    O in modo equivalente con `pwntools` (slide 10):
 
    ```sh
-   python3 -c "from pwn import *; print(ELF('/home/student/bin/vuln-nx-off').execstack)"
-   python3 -c "from pwn import *; print(ELF('/home/student/bin/vuln-nx-on').execstack)"
+   python3 -c "from pwn import *; print(ELF('/home/student/bin/i386/vuln-nx-off').execstack)"
+   python3 -c "from pwn import *; print(ELF('/home/student/bin/i386/vuln-nx-on').execstack)"
    ```
 
 2. **Stesso exploit dell'esempio 08 (shellcode injection), contro
@@ -41,3 +41,14 @@ shellcode injection (esempio 08), compilato due volte da `build.sh`:
    Nota (slide 11): NX non protegge da un attacco return-to-libc/ROP
    (esempi 03/04), perché lì non si esegue codice iniettato nello stack,
    solo codice già presente ed eseguibile altrove (libc/binario stesso).
+
+## Variante amd64-64 bit (`exploit-x64.py`, `~student/bin/x64/vuln-nx-{off,on}`)
+
+Stessa tecnica di `08-shellcode` a 64 bit (`context.aslr = False`, vedi
+quel README): `python3 exploit-x64.py vuln-nx-off` / `vuln-nx-on`.
+
+## Variante arm64 (`exploit-arm64.py`, `~student/bin/arm64/vuln-nx-{off,on}`)
+
+Stessa tecnica di `08-shellcode` in arm64 (gdb allegato a un processo già
+lanciato da pwntools, vedi quel README): `python3 exploit-arm64.py
+vuln-nx-off` / `vuln-nx-on`.

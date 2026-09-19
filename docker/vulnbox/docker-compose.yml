@@ -1,5 +1,6 @@
 services:
   vulnbox:
+    image: vulnbox:amd64
     build: .
     platform: linux/amd64
     container_name: vulnbox
@@ -11,4 +12,12 @@ services:
       - ./solutions:/home/vulnbox/solutions
     cap_add:
       - SYS_PTRACE   # richiesto da gdb (ptrace) dentro il container
+    security_opt:
+      - seccomp:unconfined   # senza, personality(ADDR_NO_RANDOMIZE) usato da
+                              # run-noaslr fallisce con ENOSYS: il profilo
+                              # seccomp di default lo blocca a prescindere
+                              # dall'architettura (verificato anche su questo
+                              # host: non è un limite dell'emulazione QEMU
+                              # come si pensava inizialmente, vedi
+                              # docker-compose.arm64.yml e solutions/README.md)
     restart: unless-stopped

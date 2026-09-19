@@ -2,8 +2,8 @@
 
 Sorgente: `src/14-countermeasure-format-string/vuln.c` — stesso schema
 dell'esempio 02 (corruzione di `flag` via `%n`), compilato due volte da
-`build.sh`: `~student/bin/vuln-format-off` (`printf(buf)`, vulnerabile) e
-`~student/bin/vuln-format-on` (`printf("%s", buf)`, sicuro) — slide
+`build.sh`: `~student/bin/i386/vuln-format-off` (`printf(buf)`, vulnerabile) e
+`~student/bin/i386/vuln-format-on` (`printf("%s", buf)`, sicuro) — slide
 SS_2.2, 25 ("Mitigations").
 
 ## Dimostrazione in aula
@@ -25,3 +25,13 @@ SS_2.2, 25 ("Mitigations").
    La correzione è quindi minima e a costo prestazionale nullo: basta
    **non passare mai input non fidato come primo argomento (format
    string) di una funzione della famiglia `printf`**.
+
+## Variante amd64-64 bit (`exploit-x64.py`, `~student/bin/x64/vuln-format-{off,on}`)
+
+Stessa tecnica di `02-format-write` a 64 bit (vedi quel README):
+`python3 exploit-x64.py vuln-format-off` / `vuln-format-on`.
+
+## Variante arm64 (`exploit-arm64.py`, `~student/bin/arm64/vuln-format-{off,on}`)
+
+Stessa tecnica di `02-format-write` in arm64 (vedi quel README):
+`python3 exploit-arm64.py vuln-format-off` / `vuln-format-on`.

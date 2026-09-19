@@ -1,7 +1,7 @@
 # 02 — Format string: data corruption (`write`)
 
 Sorgente: `src/02-format-write/write.c` — binario compilato in
-`~student/bin/write`. Obiettivo (slide 17-24): far diventare `flag != 0`
+`~student/bin/i386/write`. Obiettivo (slide 17-24): far diventare `flag != 0`
 senza mai assegnarlo esplicitamente nel codice, solo tramite l'input.
 
 ## Procedura (manuale, per la lezione)
@@ -45,3 +45,15 @@ il payload `%n` corretto):
 ```sh
 python3 exploit.py
 ```
+
+## Variante amd64-64 bit (`exploit-x64.py`, `~student/bin/x64/write`)
+
+Stessa procedura (marcatore + `%N$lx` invece di `%N$x`, indirizzo di
+`flag` a 8 byte): `fmtstr_payload` di pwntools è arch-aware e gestisce da
+sé la differenza di ABI (argomenti nei registri su amd64 invece che tutti
+sullo stack).
+
+## Variante arm64 (`exploit-arm64.py`, `~student/bin/arm64/write`)
+
+Identica alla variante x64: `fmtstr_payload` di pwntools gestisce anche
+la ABI AAPCS64 (X1-X7 poi stack) senza modifiche allo script.

@@ -1,6 +1,7 @@
 # Note/contesto locali, non destinate al repository pubblico
 TODO.md
 CLAUDE.md
+docker/vulnbox/TODO-multiarch.md
 
 # OS
 .DS_Store
