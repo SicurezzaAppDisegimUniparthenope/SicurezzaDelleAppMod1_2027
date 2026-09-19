@@ -1,6 +1,6 @@
 # 04 — Return Oriented Programming (`rop`)
 
-Sorgente: `src/04-rop/rop.c` — binario compilato in `~student/bin/rop`
+Sorgente: `src/04-rop/rop.c` — binario compilato in `~student/bin/i386/rop`
 (slide SS_3.2, esempio ripreso da codearcana.com citato in slide 15).
 
 Il programma contiene tre funzioni pensate per essere incatenate come
@@ -60,3 +60,50 @@ python3 exploit.py
 Ricava offset e indirizzi delle tre funzioni dal binario (via `ELF` di
 `pwntools`, senza bisogno di ASLR off: il binario è `-no-pie`), costruisce
 la catena ROP e apre una shell interattiva.
+
+## Variante amd64-64 bit (`exploit-x64.py`, `~student/bin/x64/rop`)
+
+Stessa catena `add_bin()`/`add_sh()`/`exec_string()`, con la differenza di
+ABI System V AMD64: gli argomenti passano nei registri (RDI/RSI), quindi
+servono gadget `pop rdi; ret`/`pop rsi; ret` (assenti nel binario stesso,
+presi da libc con `ROP([elf, libc])`) al posto dei semplici `pop; ret`
+cdecl. Come in `03-ret2libc`, `system()` (chiamata da `exec_string()`)
+richiede uno stack allineato a 16 byte e `context.aslr = False` per lo
+stesso motivo (nessun gadget per un leak reale, vedi la nota in
+`03-ret2libc/README.md`).
+
+## Variante arm64: NON portata (limite strutturale, documentato)
+
+A differenza di `03-ret2libc` (dove si è trovato un gadget manuale
+`ldr x0,[sp,#N]; ldp x29,x30,[sp],#M; ret` per chiamare `system()`),
+concatenare **più funzioni in sequenza** (`add_bin()` → `add_sh()` →
+`exec_string()`) su AArch64 si scontra con un limite strutturale della
+ABI, non con un problema di tooling:
+
+**Il problema**: qualunque salto "ret"-based su AArch64 (sia un overflow
+diretto sul return address, sia un gadget che carica LR dallo stack)
+lascia **X30 (LR) uguale all'indirizzo appena raggiunto** — è il valore
+stesso appena usato per il salto, `ret` non lo modifica. Se la funzione
+raggiunta è una **funzione foglia** (non chiama altro internamente, come
+`add_bin`/`add_sh`: nessuna `bl` nel loro corpo — vedi anche la stessa
+identica scoperta per `highSecurityFunction` in
+`07-stack-corruption/README.md`, lì innocua perché serviva un solo
+salto), il suo stesso `ret` finale userà quello stesso LR invariato,
+**rientrando sempre in se stessa** — un loop infinito che riscrive solo
+il PRIMO pezzo della stringa, senza mai proseguire alla funzione
+successiva della catena.
+
+Perché `03-ret2libc` invece funziona: lì si salta a `system()`, che
+**non** è una funzione foglia (chiama internamente `fork`/`execve` con
+vere istruzioni `bl`), quindi il suo LR viene legittimamente aggiornato
+prima del suo `ret` finale — nessun self-loop.
+
+**Come si risolverebbe in teoria**: servirebbe un gadget che usi `blr`
+(branch-with-link **a registro**) invece di un semplice `ret` per
+saltare da una funzione della catena alla successiva — un gadget che
+aggiorni LR **legittimamente** ad ogni passaggio, analogo concettuale
+della tecnica "ret2csu" di x86-64. Non è stato cercato/implementato in
+questa sessione (richiede identificare un gadget `blr` utilizzabile nel
+binario/libc, più complesso della ricerca già fatta per `03`): lasciato
+come lavoro futuro se si vuole completare anche questo esempio per
+arm64.

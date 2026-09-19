@@ -1,7 +1,7 @@
 # 08 — Memory corruption: shellcode injection (`shellcode`)
 
 Sorgente: `src/07-shellcode/shellcode.c` — binario compilato in
-`~student/bin/shellcode` (slide SS_2.1, 35-46). `name[64]` viene riempito
+`~student/bin/i386/shellcode` (slide SS_2.1, 35-46). `name[64]` viene riempito
 con `read()` senza controllo di lunghezza, e lo stack è eseguibile
 (`vuln-gcc` include `-z execstack`).
 
@@ -56,3 +56,28 @@ python3 exploit.py
 
 Trova offset e indirizzo di destinazione automaticamente (dal corefile
 del crash) e apre una shell interattiva.
+
+## Variante amd64-64 bit (`exploit-x64.py`, `~student/bin/x64/shellcode`)
+
+Stessa tecnica (nessun gadget `jmp rsp`/`call rsp` disponibile, verificato)
+con una differenza importante rispetto a i386: qui **l'ASLR randomizza
+davvero** stack/libc a ogni lancio (a differenza di i386, dove non
+randomizza mai sotto QEMU). Si usa quindi `context.aslr = False` per
+rendere l'indirizzo di stack letto dal corefile "usa e getta" valido
+anche nel processo successivo — stesso compromesso adottato in
+`03-ret2libc` (vedi quel README per il perché un vero leak non è
+praticabile su questi binari). Shellcode generato con
+`shellcraft.amd64.linux.sh()`.
+
+## Variante arm64 (`exploit-arm64.py`, `~student/bin/arm64/shellcode`)
+
+Stessa tecnica (`context.aslr = False`, nessun gadget `jmp/call sp`
+disponibile), con una scoperta reale in più: l'indirizzo di stack va
+letto **allegando gdb a un processo già lanciato da pwntools** (`gdb -p
+PID`), non facendolo partire direttamente da gdb (`gdb --batch run <
+payload BIN`) — le due modalità di lancio danno **indirizzi di stack
+diversi** anche con ASLR disabilitata (ambiente/argv leggermente
+diversi spostano il fondo dello stack di alcuni byte), scoperto per
+tentativi in questa sessione dopo alcuni fallimenti intermittenti.
+Niente corefile automatico (vedi `07-stack-corruption/README.md`).
+Shellcode generato con `shellcraft.aarch64.linux.sh()`.

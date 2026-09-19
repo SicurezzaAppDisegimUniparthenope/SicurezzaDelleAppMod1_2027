@@ -1,7 +1,7 @@
 # 06 — Memory corruption: sovrascrittura di variabile (`override`)
 
 Sorgente: `src/05-var-override/override.c` — binario compilato in
-`~student/bin/override` (slide SS_2.1, 8-16). `buffer[12]` e `variable`
+`~student/bin/i386/override` (slide SS_2.1, 8-16). `buffer[12]` e `variable`
 sono adiacenti sullo stack: un input più lungo di 12 byte trabocca su
 `variable`.
 
@@ -28,3 +28,17 @@ sono adiacenti sullo stack: un input più lungo di 12 byte trabocca su
    ```sh
    python3 exploit.py
    ```
+
+## Variante amd64-64 bit (`exploit-x64.py`, `~student/bin/x64/override`)
+
+Identica: `variable` resta un `int` a 4 byte indipendentemente dalla
+bitness del binario, quindi si passa esplicitamente `n=4` a
+`cyclic()`/`cyclic_find()` invece di lasciare il default di pwntools (che
+per `context.arch="amd64"` userebbe cicli a 8 byte, pensati per trovare
+puntatori a 64 bit, non un `int`).
+
+## Variante arm64 (`exploit-arm64.py`, `~student/bin/arm64/override`)
+
+Identica alle altre due (`context.arch = "aarch64"`, `n=4`): funziona
+invariata, nessuna sorpresa specifica di AArch64 per questo esempio
+(l'overflow non tocca in alcun modo LR/x30).

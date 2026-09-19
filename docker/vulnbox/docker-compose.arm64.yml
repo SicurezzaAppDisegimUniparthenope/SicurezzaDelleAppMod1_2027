@@ -1,0 +1,24 @@
+services:
+  vulnbox:
+    image: vulnbox:arm64
+    build:
+      context: .
+    platform: linux/arm64
+    container_name: vulnbox-arm64
+    hostname: vulnbox
+    ports:
+      - "127.0.0.1:2202:22"
+    volumes:
+      - ./src:/home/student/src
+      - ./solutions:/home/vulnbox/solutions
+    cap_add:
+      - SYS_PTRACE   # richiesto da gdb (ptrace) dentro il container
+    security_opt:
+      - seccomp:unconfined   # senza, personality(ADDR_NO_RANDOMIZE) usato da
+                              # run-noaslr fallisce con ENOSYS: il profilo
+                              # seccomp di default lo blocca su questo host
+                              # arm64 nativo (verificato: cap_add SYS_PTRACE
+                              # da solo non basta, serve disabilitare seccomp;
+                              # coerente con lo scopo del container, già
+                              # deliberatamente vulnerabile)
+    restart: unless-stopped

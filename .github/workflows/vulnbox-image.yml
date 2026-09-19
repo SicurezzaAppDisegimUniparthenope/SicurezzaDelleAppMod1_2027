@@ -1,10 +1,22 @@
 name: Build and publish vulnbox image
 
-# Pubblica su GitHub Container Registry (ghcr.io) l'immagine amd64
-# (toolchain multilib, esempi a 32 bit via gcc -m32) usata dagli studenti
-# per gli esercizi (docker/vulnbox/), così non devono clonare il repo e
-# buildare in locale: basta "docker pull". I runner GitHub-hosted sono
-# amd64 nativi, quindi la build non richiede emulazione QEMU.
+# Pubblica su GitHub Container Registry (ghcr.io) le immagini vulnbox
+# (docker/vulnbox/) usate dagli studenti per gli esercizi, così non devono
+# clonare il repo e buildare in locale: basta "docker pull".
+#
+# Matrix build su 2 combinazioni, entrambe compilate NATIVAMENTE (nessuna
+# emulazione QEMU, vedi TODO-multiarch.md per il perché):
+# - amd64: toolchain multilib, esempi sia a 32 bit (gcc -m32, bin/i386/)
+#   che 64 bit (gcc -m64, bin/x64/) nella stessa immagine. Runner
+#   GitHub-hosted "ubuntu-latest" è amd64 nativo. Tag :latest (storico,
+#   invariato per non rompere i "docker pull" esistenti degli studenti) +
+#   :<release>.
+# - arm64: esempi a 64 bit nativi (bin/arm64/), niente variante a 32 bit
+#   (armhf) — scartata dopo spike, vedi TODO-multiarch.md P0. Runner
+#   GitHub-hosted nativo arm64 "ubuntu-24.04-arm" (gratuito, nessun costo
+#   aggiuntivo). Tag :<release>-arm64 (niente :latest-arm64: gli studenti
+#   che non specificano piattaforma devono continuare a ricevere l'amd64
+#   storica).
 #
 # Si attiva solo alla pubblicazione di una release (tag nel formato di
 # questo progetto: YYYYMMDDHHMM), non a ogni push su main.
@@ -25,7 +37,16 @@ permissions:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+            platform: linux/amd64
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+            platform: linux/arm64
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -50,12 +71,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build e push
+      - name: Build e push (amd64, tag :latest + :<release>)
+        if: matrix.arch == 'amd64'
         uses: docker/build-push-action@v7
         with:
           context: docker/vulnbox
-          platforms: linux/amd64
+          platforms: ${{ matrix.platform }}
           push: true
           tags: |
             ${{ env.IMAGE }}:latest
             ${{ env.IMAGE }}:${{ env.TAG }}
+
+      - name: Build e push (arm64, tag :<release>-arm64)
+        if: matrix.arch == 'arm64'
+        uses: docker/build-push-action@v7
+        with:
+          context: docker/vulnbox
+          platforms: ${{ matrix.platform }}
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ env.TAG }}-arm64

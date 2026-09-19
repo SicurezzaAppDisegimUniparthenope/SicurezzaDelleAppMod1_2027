@@ -1,5 +1,9 @@
 #!/bin/sh
 # Wrapper gcc con le protezioni tipicamente disattivate negli esempi delle
-# slide (stack canary, NX, PIE) e target a 32 bit (-m32), come nelle
-# slide (registri EAX/EBX, syscall int 0x80). Uso: vuln-gcc -o prog prog.c
-exec gcc -m32 -g -fno-stack-protector -z execstack -no-pie "$@"
+# slide (stack canary, NX, PIE). Il compilatore/target arch è fissato al
+# build dell'immagine in /etc/vulnbox-cc (vedi Dockerfile, ARG
+# TARGETARCH+BUILD_BITS): "gcc -m32" su amd64 (default, come nelle slide,
+# registri EAX/EBX, syscall int 0x80), "gcc -m64" su amd64+64, "gcc" su
+# arm64 (nativo a 64 bit, nessun flag). Uso: vuln-gcc -o prog prog.c
+CC="$(cat /etc/vulnbox-cc)"
+exec $CC -g -fno-stack-protector -z execstack -no-pie "$@"
