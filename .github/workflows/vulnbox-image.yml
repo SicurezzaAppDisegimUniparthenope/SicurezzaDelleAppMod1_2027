@@ -14,9 +14,10 @@ name: Build and publish vulnbox image
 # - arm64: esempi a 64 bit nativi (bin/arm64/), niente variante a 32 bit
 #   (armhf) — scartata dopo spike, vedi TODO-multiarch.md P0. Runner
 #   GitHub-hosted nativo arm64 "ubuntu-24.04-arm" (gratuito, nessun costo
-#   aggiuntivo). Tag :<release>-arm64 (niente :latest-arm64: gli studenti
-#   che non specificano piattaforma devono continuare a ricevere l'amd64
-#   storica).
+#   aggiuntivo). Tag :<release>-arm64 + :latest-arm64 (quest'ultimo per
+#   chi vuole sempre l'ultima arm64 senza seguire le release; il bare
+#   :latest resta amd64, così chi non specifica piattaforma continua a
+#   ricevere l'amd64 storica).
 #
 # Si attiva solo alla pubblicazione di una release (tag nel formato di
 # questo progetto: YYYYMMDDHHMM), non a ogni push su main.
@@ -82,7 +83,7 @@ jobs:
             ${{ env.IMAGE }}:latest
             ${{ env.IMAGE }}:${{ env.TAG }}
 
-      - name: Build e push (arm64, tag :<release>-arm64)
+      - name: Build e push (arm64, tag :<release>-arm64 + :latest-arm64)
         if: matrix.arch == 'arm64'
         uses: docker/build-push-action@v7
         with:
@@ -91,3 +92,4 @@ jobs:
           push: true
           tags: |
             ${{ env.IMAGE }}:${{ env.TAG }}-arm64
+            ${{ env.IMAGE }}:latest-arm64
