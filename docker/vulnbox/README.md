@@ -77,15 +77,16 @@ ssh -p 2201 student@localhost   # password: student (nessun sudo)
 
 L'immagine viene ripubblicata a ogni release del repository (vedi
 `.github/workflows/vulnbox-image.yml`), tag nel formato `YYYYMMDDHHMM`
-oltre a `:latest` (amd64, variante storica) — più `:<release>-arm64` per
-la variante arm64 nativa (niente `:latest-arm64`: chi fa `docker pull`
-senza specificare piattaforma riceve sempre l'amd64 storica):
+oltre a `:latest` (amd64, variante storica) — più `:<release>-arm64` e
+`:latest-arm64` per la variante arm64 nativa (il bare `:latest` resta
+amd64: chi fa `docker pull` senza specificare piattaforma continua a
+riceverla):
 
 ```sh
-docker pull ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:<release>-arm64
+docker pull ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:latest-arm64
 docker run -d --name vulnbox-arm64 -p 127.0.0.1:2202:22 --cap-add=SYS_PTRACE \
     --security-opt seccomp=unconfined \
-    ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:<release>-arm64
+    ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:latest-arm64
 ssh -p 2202 student@localhost   # password: student (nessun sudo)
 ```
 
