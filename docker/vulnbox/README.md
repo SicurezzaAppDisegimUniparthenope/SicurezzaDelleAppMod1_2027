@@ -90,6 +90,29 @@ docker run -d --name vulnbox-arm64 -p 127.0.0.1:2202:22 --cap-add=SYS_PTRACE \
 ssh -p 2202 student@localhost   # password: student (nessun sudo)
 ```
 
+**Errore su Apple Silicon / host arm64 con `:latest`.** Un `docker pull
+...:latest` senza piattaforma esplicita su host arm64 fallisce con:
+
+```
+no image found in image index for architecture "arm64", variant "v8", OS "linux"
+```
+
+Non è un problema della pubblicazione: `:latest` contiene solo l'immagine
+amd64 e Docker/Podman non ripiegano automaticamente sull'emulazione. Due
+alternative:
+
+- **variante arm64 nativa** (consigliata su Apple Silicon): usare
+  `:latest-arm64` come nell'esempio sopra;
+- **variante amd64 emulata** (es. per gli esempi a 32 bit in `bin/i386/`):
+  indicare la piattaforma esplicitamente, sia nel pull che nel run:
+
+  ```sh
+  docker pull --platform linux/amd64 ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:latest
+  docker run -d --platform linux/amd64 --name vulnbox -p 127.0.0.1:2201:22 \
+      --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
+      ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:latest
+  ```
+
 ## Uso — docente (build locale, con `src/` e `solutions/` live)
 
 ```sh

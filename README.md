@@ -43,6 +43,23 @@ docker run -d --name vulnbox -p 127.0.0.1:2201:22 --cap-add=SYS_PTRACE \
 ssh -p 2201 student@localhost   # password: student
 ```
 
+**Su Mac Apple Silicon (o qualunque host arm64)** il comando sopra fallisce
+con `no image found in image index for architecture "arm64"`: il tag
+`:latest` contiene solo l'immagine amd64 e Docker/Podman non ripiegano da
+soli sull'emulazione. Usare invece la variante arm64 nativa (consigliata,
+gdb live/strace/ASLR reale funzionanti):
+
+```bash
+docker pull ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:latest-arm64
+docker run -d --name vulnbox-arm64 -p 127.0.0.1:2202:22 --cap-add=SYS_PTRACE \
+    --security-opt seccomp=unconfined \
+    ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:latest-arm64
+ssh -p 2202 student@localhost   # password: student
+```
+
+oppure, se servono gli esempi a 32 bit (`bin/i386/`), forzare l'amd64
+emulata con `--platform linux/amd64` sia su `docker pull` che su `docker run`.
+
 Dettagli, credenziali, elenco esempi e limiti noti (es. `ptrace`/gdb live
 sotto emulazione su Apple Silicon) in [`docker/vulnbox/README.md`](docker/vulnbox/README.md).
 
