@@ -113,6 +113,22 @@ alternative:
       ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:latest
   ```
 
+### Chiudere vulnbox a fine sessione
+
+Il container resta acceso in background finché non viene fermato
+(`exit` nella sessione SSH chiude solo la connessione, non il container):
+
+```sh
+docker stop vulnbox          # ferma il container (riavviabile con: docker start vulnbox)
+docker rm vulnbox            # opzionale: lo elimina (al prossimo uso si rifà docker run)
+```
+
+Per la variante arm64 sostituire `vulnbox` con `vulnbox-arm64`. Per vedere
+quali container sono attivi: `docker ps` (`docker ps -a` include quelli fermi).
+Rimuovere il container **non** cancella l'immagine scaricata: per liberare
+anche lo spazio su disco, `docker rmi ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:latest`
+(o `:latest-arm64`).
+
 ## Uso — docente (build locale, con `src/` e `solutions/` live)
 
 ```sh

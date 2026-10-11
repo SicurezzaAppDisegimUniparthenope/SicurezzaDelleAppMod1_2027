@@ -74,6 +74,22 @@ run` segnala `the container name "vulnbox" is already in use`, esiste già un
 container con quel nome (es. da un avvio precedente o da `docker compose`):
 rimuoverlo con `docker rm vulnbox` oppure usare un altro `--name`.
 
+### Chiudere vulnbox a fine sessione
+
+Il container resta acceso in background finché non viene fermato
+(`exit` nella sessione SSH chiude solo la connessione, non il container):
+
+```bash
+docker stop vulnbox          # ferma il container (riavviabile con: docker start vulnbox)
+docker rm vulnbox            # opzionale: lo elimina (al prossimo uso si rifà docker run)
+```
+
+Per la variante arm64 sostituire `vulnbox` con `vulnbox-arm64`. Per vedere
+quali container sono attivi: `docker ps` (`docker ps -a` include quelli fermi).
+Rimuovere il container **non** cancella l'immagine scaricata: per liberare
+anche lo spazio su disco, `docker rmi ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:latest`
+(o `:latest-arm64`).
+
 Dettagli, credenziali, elenco esempi e limiti noti (es. `ptrace`/gdb live
 sotto emulazione su Apple Silicon) in [`docker/vulnbox/README.md`](docker/vulnbox/README.md).
 
