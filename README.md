@@ -57,8 +57,22 @@ docker run -d --name vulnbox-arm64 -p 127.0.0.1:2202:22 --cap-add=SYS_PTRACE \
 ssh -p 2202 student@localhost   # password: student
 ```
 
-oppure, se servono gli esempi a 32 bit (`bin/i386/`), forzare l'amd64
-emulata con `--platform linux/amd64` sia su `docker pull` che su `docker run`.
+oppure, se servono gli esempi a 32 bit (`bin/i386/`), usare l'immagine
+amd64 in emulazione, indicando `--platform linux/amd64` sia su `docker pull`
+che su `docker run` (gdb live/strace non funzionano sotto emulazione):
+
+```bash
+docker pull --platform linux/amd64 ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:latest
+docker run -d --platform linux/amd64 --name vulnbox -p 127.0.0.1:2201:22 \
+    --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
+    ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:latest
+ssh -p 2201 student@localhost   # password: student
+```
+
+Le due varianti possono girare in parallelo (porte 2201 e 2202). Se `docker
+run` segnala `the container name "vulnbox" is already in use`, esiste già un
+container con quel nome (es. da un avvio precedente o da `docker compose`):
+rimuoverlo con `docker rm vulnbox` oppure usare un altro `--name`.
 
 Dettagli, credenziali, elenco esempi e limiti noti (es. `ptrace`/gdb live
 sotto emulazione su Apple Silicon) in [`docker/vulnbox/README.md`](docker/vulnbox/README.md).
