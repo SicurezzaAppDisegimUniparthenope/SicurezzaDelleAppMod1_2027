@@ -19,13 +19,9 @@ la chiamata fallisce e il programma esce subito.
 >
 > **Variante arm64 nativa**: verificato in questa sessione (host Apple
 > M5) che i 3 punti sotto funzionano **esattamente come su un host x86_64
-> reale** (nessuna emulazione, quindi nessun limite ptrace) — **con
-> un'unica differenza nel punto 3**: gdb su AArch64 richiede un cast
-> esplicito sul valore di ritorno (`return (int)0`, non `return 0`),
-> perché senza simboli di debug per `ptrace` non conosce la dimensione del
-> tipo di ritorno e si rifiuta di procedere ("Return value type not
-> available for selected stack frame"). Su i386/x64 `return 0` senza cast
-> è sufficiente.
+> reale** (nessuna emulazione, quindi nessun limite ptrace). Il cast
+> esplicito nel punto 3 (`return (int)0`) non è una particolarità di
+> AArch64: serve su tutte e tre le architetture (vedi punto 3).
 
 ## Dimostrazione in aula
 
@@ -55,11 +51,33 @@ la chiamata fallisce e il programma esce subito.
    gdb ~/bin/<arch>/antidebug
    (gdb) break ptrace
    (gdb) run
-   (gdb) return 0        # su arm64: return (int)0 — vedi nota sopra
+   (gdb) return (int)0   # il cast è obbligatorio, vedi sotto
    (gdb) continue
    # "Nessun debugger rilevato, procedo normalmente." anche sotto gdb!
    ```
 
-   `return 0` di gdb forza la funzione corrente (`ptrace`) a restituire
-   `0` senza eseguirla, esattamente il valore che il programma si aspetta
-   in assenza di un debugger.
+   `return (int)0` di gdb forza la funzione corrente (`ptrace`) a
+   restituire `0` senza eseguirla, esattamente il valore che il programma
+   si aspetta in assenza di un debugger. gdb chiede conferma prima di
+   forzare il ritorno: rispondere `y` (oppure `set confirm off` all'inizio,
+   necessario se si lancia gdb con `-batch`).
+
+   **Il cast è necessario su i386, x64 e arm64.** `ptrace` sta in libc,
+   che non ha simboli di debug, quindi gdb non ne conosce il tipo di
+   ritorno. Con un semplice `return 0` si ferma con "Return value type not
+   available for selected stack frame. Please use an explicit cast of the
+   value to return." e il programma rileva comunque il debugger.
+   Verificato il 2026-10-15 sulla vulnbox (host x86_64 nativo, i386 e x64,
+   con e senza PEDA); su arm64 nativo nella sessione di porting
+   multi-arch.
+
+   **Alternativa** (verificata su i386 e x64): lasciar eseguire `ptrace` e
+   correggerne il risultato prima del controllo:
+
+   ```sh
+   (gdb) break ptrace
+   (gdb) run
+   (gdb) finish          # ptrace termina e restituisce -1
+   (gdb) set $eax = 0    # su x64: set $rax = 0
+   (gdb) continue
+   ```

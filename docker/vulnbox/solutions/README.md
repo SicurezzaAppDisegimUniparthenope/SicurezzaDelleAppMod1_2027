@@ -83,11 +83,11 @@ limiti della sezione precedente **tranne uno**:
 
 - **gdb in modalità live** e i tre punti dell'esempio 11 (`antidebug`,
   incluso il bypass): funzionano esattamente come su un host x86_64 reale.
-  Unica differenza: nel passo di bypass (`return 0` su una funzione senza
-  simboli di debug), **gdb su AArch64 richiede un cast esplicito**
-  (`return (int)0`, non `return 0`) — altrimenti si ferma con "Return
-  value type not available for selected stack frame". Vedi la nota
-  nel README dell'esempio 11.
+  Il passo di bypass richiede il cast esplicito (`return (int)0`, non
+  `return 0`), altrimenti gdb si ferma con "Return value type not
+  available for selected stack frame". Non è una differenza di AArch64:
+  vale anche per i386/x64 (verificato il 2026-10-15). Vedi il README
+  dell'esempio 11.
 - **ASLR** (esempio 14): randomizza realmente a ogni esecuzione, proprio
   come su un host x86_64 reale (a differenza della variante amd64 emulata,
   dove è sempre fissa).
