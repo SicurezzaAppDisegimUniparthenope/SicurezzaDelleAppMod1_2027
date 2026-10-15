@@ -2,7 +2,7 @@
  * Dynamic analysis - segreto offuscato, non più leggibile con
  * readelf/strings da solo.
  * Basato su "SS_1.3 - Static and Dynamic Analysis.pptx", slide 17-27:
- * il nome non è più una stringa in chiaro nel binario (è offuscato con
+ * la risposta non è più una stringa in chiaro nel binario (è offuscato con
  * uno XOR banale), ma viene comunque deoffuscato in una variabile in
  * chiaro a runtime, osservabile con gdb (step-by-step nello stack) o con
  * ltrace (che intercetta la strcmp con l'argomento già deoffuscato).
@@ -14,7 +14,7 @@
 #include <string.h>
 
 static const unsigned char secret_obf[] = {
-    0x0c, 0x3b, 0x36, 0x3f, 0x28, 0x33, 0x3b
+    0x1e, 0x15, 0x14, 0x7d, 0x0e, 0x7a, 0x0a, 0x1b, 0x14, 0x13, 0x19
 };
 #define XOR_KEY 0x5A
 
@@ -32,7 +32,7 @@ int main(void) {
 
     deobfuscate(secret, secret_obf, sizeof(secret_obf));
 
-    printf("Indovina il mio nome: ");
+    printf("Cosa c'è scritto sulla copertina? ");
     fflush(stdout);
 
     if (!fgets(guess, sizeof(guess), stdin)) {

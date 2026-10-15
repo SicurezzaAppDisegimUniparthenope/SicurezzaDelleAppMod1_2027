@@ -3,7 +3,7 @@
 Sorgente: `src/09-dynamic-secret/guessmyname2.c` — binario compilato in
 `~student/bin/<arch>/guessmyname2` **senza simboli di debug** (slide SS_1.3,
 17-27), dove `<arch>` è `i386`/`x64` sulla variante amd64 o `arm64` sulla
-variante arm64: il nome non è più leggibile in chiaro con
+variante arm64: la risposta non è più leggibile in chiaro con
 `readelf`/`strings` (è offuscato con uno XOR), ma viene deoffuscato in una
 variabile in chiaro a runtime.
 
@@ -32,11 +32,11 @@ variabile in chiaro a runtime.
 
    ```sh
    readelf -x .rodata ~/bin/<arch>/guessmyname2
-   strings ~/bin/<arch>/guessmyname2 | grep -i valeria   # niente
+   strings ~/bin/<arch>/guessmyname2 | grep -i panic   # niente
    ```
 
 2. **`gdb` — analisi dinamica** (slide 19-24): breakpoint su `main`,
-   esecuzione passo-passo con `nexti`, finché il nome deoffuscato non
+   esecuzione passo-passo con `nexti`, finché la risposta deoffuscata non
    compare in un registro/nello stack:
 
    ```sh
@@ -59,15 +59,15 @@ variabile in chiaro a runtime.
    deoffuscato come argomento:
 
    ```sh
-   echo Valeria | ltrace ~/bin/<arch>/guessmyname2
+   echo "DON'T PANIC" | ltrace ~/bin/<arch>/guessmyname2
    ```
 
-   Nell'output di `ltrace` compare la chiamata `strcmp("...", "Valeria")`
+   Nell'output di `ltrace` compare la chiamata `strcmp("...", "DON'T PANIC")`
    con il secondo argomento già in chiaro, indipendentemente da cosa si è
    digitato come tentativo.
 
-4. **Usare il nome trovato**:
+4. **Usare la risposta trovata**:
 
    ```sh
-   echo Valeria | ~/bin/<arch>/guessmyname2
+   echo "DON'T PANIC" | ~/bin/<arch>/guessmyname2
    ```
