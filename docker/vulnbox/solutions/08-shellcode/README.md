@@ -1,6 +1,6 @@
 # 08 — Memory corruption: shellcode injection (`shellcode`)
 
-Sorgente: `src/07-shellcode/shellcode.c` — binario compilato in
+Sorgente: `src/08-shellcode/shellcode.c` — binario compilato in
 `~student/bin/i386/shellcode` (slide SS_2.1, 35-46). `name[64]` viene riempito
 con `read()` senza controllo di lunghezza, e lo stack è eseguibile
 (`vuln-gcc` include `-z execstack`).

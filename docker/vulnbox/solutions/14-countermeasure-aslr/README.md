@@ -1,6 +1,6 @@
 # 14 — Countermeasure: ASLR (`aslr`)
 
-Sorgente: `src/13-countermeasure-aslr/aslr.c` — binario compilato in
+Sorgente: `src/14-countermeasure-aslr/aslr.c` — binario compilato in
 `~student/bin/<arch>/aslr` (slide SS_2.4, 25-29, dove `<arch>` è `i386`/`x64`
 sulla variante amd64 o `arm64` sulla variante arm64). Stampa l'indirizzo di
 una variabile locale nello stack.

@@ -1,6 +1,6 @@
 # 07 — Memory corruption: corruzione del return address (`corruption`)
 
-Sorgente: `src/06-stack-corruption/corruption.c` — binario compilato in
+Sorgente: `src/07-stack-corruption/corruption.c` — binario compilato in
 `~student/bin/i386/corruption` (slide SS_2.1, 18-29). `highSecurityFunction()`
 non è mai chiamata dal codice normale: l'unico modo per raggiungerla è
 sovrascrivere l'indirizzo di ritorno di `lowSecurityFunction()`.

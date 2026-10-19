@@ -1,6 +1,6 @@
 # 13 — Countermeasure: Stack Canary (`vuln-canary-off` / `vuln-canary-on`)
 
-Sorgente: `src/12-countermeasure-canary/vuln.c` — **stesso** sorgente
+Sorgente: `src/13-countermeasure-canary/vuln.c` — **stesso** sorgente
 della corruzione del return address (esempio 07: `highSecurityFunction`
 raggiungibile solo tramite overflow), compilato due volte da `build.sh`:
 `~student/bin/i386/vuln-canary-off` e `~student/bin/i386/vuln-canary-on`

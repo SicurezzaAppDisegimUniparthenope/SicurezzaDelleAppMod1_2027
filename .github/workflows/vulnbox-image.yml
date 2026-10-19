@@ -59,6 +59,10 @@ jobs:
           # questo progetto: YYYYMMDDHHMM). Su workflow_dispatch manuale
           # (nessuna release) si usa la data corrente come fallback.
           echo "TAG=${RELEASE_TAG:-$(date -u +%Y%m%d%H%M)}" >> "$GITHUB_ENV"
+          # SHA breve del commit da cui si builda: finisce in
+          # /etc/vulnbox-version ed è mostrato dal comando `vulnbox_ver`
+          # nel container (formato "Vulnbox <tag> (<sha>)").
+          echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
 
@@ -79,6 +83,9 @@ jobs:
           context: docker/vulnbox
           platforms: ${{ matrix.platform }}
           push: true
+          build-args: |
+            VULNBOX_VERSION=${{ env.TAG }}
+            VULNBOX_COMMIT=${{ env.SHA_SHORT }}
           tags: |
             ${{ env.IMAGE }}:latest
             ${{ env.IMAGE }}:${{ env.TAG }}
@@ -90,6 +97,9 @@ jobs:
           context: docker/vulnbox
           platforms: ${{ matrix.platform }}
           push: true
+          build-args: |
+            VULNBOX_VERSION=${{ env.TAG }}
+            VULNBOX_COMMIT=${{ env.SHA_SHORT }}
           tags: |
             ${{ env.IMAGE }}:${{ env.TAG }}-arm64
             ${{ env.IMAGE }}:latest-arm64

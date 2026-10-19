@@ -1,0 +1,11 @@
+#!/bin/sh
+# Stampa la release dell'immagine vulnbox in uso, nel formato
+#   Vulnbox <versione> (<last commit id>)
+# dove <versione> è il tag della release (formato YYYYMMDDHHMM di questo
+# progetto) e <last commit id> è lo SHA breve del commit da cui l'immagine
+# è stata costruita. I due valori sono fissati al build come ARG
+# (VULNBOX_VERSION/VULNBOX_COMMIT) e scritti in /etc/vulnbox-version dal
+# Dockerfile; la CI (.github/workflows/vulnbox-image.yml) li passa a
+# partire dalla release GitHub e dal SHA del checkout. In una build locale
+# senza quegli ARG restano i default "dev"/"unknown".
+cat /etc/vulnbox-version 2>/dev/null || echo "Vulnbox dev (unknown)"

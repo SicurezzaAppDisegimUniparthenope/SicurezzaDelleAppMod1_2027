@@ -75,6 +75,14 @@ docker run -d --name vulnbox -p 127.0.0.1:2201:22 --cap-add=SYS_PTRACE \
 ssh -p 2201 student@localhost   # password: student (nessun sudo)
 ```
 
+Per sapere quale release si sta usando, dentro il container c'è il comando
+`vulnbox_ver`, che stampa versione e commit da cui l'immagine è stata
+costruita:
+
+```sh
+vulnbox_ver   # es. Vulnbox 202610191430 (a2c025f)
+```
+
 L'immagine viene ripubblicata a ogni release del repository (vedi
 `.github/workflows/vulnbox-image.yml`), tag nel formato `YYYYMMDDHHMM`
 oltre a `:latest` (amd64, variante storica) — più `:<release>-arm64` e

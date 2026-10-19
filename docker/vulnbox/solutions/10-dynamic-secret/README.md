@@ -1,6 +1,6 @@
 # 10 — Dynamic analysis: segreto offuscato (`guessmyname2`)
 
-Sorgente: `src/09-dynamic-secret/guessmyname2.c` — binario compilato in
+Sorgente: `src/10-dynamic-secret/guessmyname2.c` — binario compilato in
 `~student/bin/<arch>/guessmyname2` **senza simboli di debug** (slide SS_1.3,
 17-27), dove `<arch>` è `i386`/`x64` sulla variante amd64 o `arm64` sulla
 variante arm64: la risposta non è più leggibile in chiaro con

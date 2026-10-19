@@ -1,6 +1,6 @@
 # 12 — Countermeasure: NX (`vuln-nx-off` / `vuln-nx-on`)
 
-Sorgente: `src/11-countermeasure-nx/vuln.c` — **stesso** sorgente dello
+Sorgente: `src/12-countermeasure-nx/vuln.c` — **stesso** sorgente dello
 shellcode injection (esempio 08), compilato due volte da `build.sh`:
 `~student/bin/i386/vuln-nx-off` (stack eseguibile, come l'esempio 07/08) e
 `~student/bin/i386/vuln-nx-on` (stack non eseguibile) — slide SS_2.4, 6-11.

@@ -123,8 +123,19 @@ RUN echo 'kernel.yama.ptrace_scope = 0' > /etc/sysctl.d/10-ptrace.conf || true
 COPY vuln-gcc /usr/local/bin/vuln-gcc
 COPY vuln-gcc64 /usr/local/bin/vuln-gcc64
 COPY run-noaslr /usr/local/bin/run-noaslr
+COPY vulnbox_ver /usr/local/bin/vulnbox_ver
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /usr/local/bin/vuln-gcc /usr/local/bin/vuln-gcc64 /usr/local/bin/run-noaslr /entrypoint.sh
+RUN chmod +x /usr/local/bin/vuln-gcc /usr/local/bin/vuln-gcc64 /usr/local/bin/run-noaslr /usr/local/bin/vulnbox_ver /entrypoint.sh
+
+# Versione dell'immagine (release + commit) fissata al build e letta a
+# runtime dal comando `vulnbox_ver` (in PATH per entrambi gli account).
+# Posta in fondo apposta: cambiare versione/commit invalida solo questo
+# layer, non l'intera build. Default "dev"/"unknown" per le build locali;
+# la CI passa i valori reali via --build-arg (vedi
+# .github/workflows/vulnbox-image.yml).
+ARG VULNBOX_VERSION=dev
+ARG VULNBOX_COMMIT=unknown
+RUN printf 'Vulnbox %s (%s)\n' "$VULNBOX_VERSION" "$VULNBOX_COMMIT" > /etc/vulnbox-version
 
 EXPOSE 22
 ENTRYPOINT ["/entrypoint.sh"]

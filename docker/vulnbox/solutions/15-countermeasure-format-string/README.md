@@ -1,6 +1,6 @@
 # 15 — Countermeasure: mitigazione format string (`vuln-format-off` / `vuln-format-on`)
 
-Sorgente: `src/14-countermeasure-format-string/vuln.c` — stesso schema
+Sorgente: `src/15-countermeasure-format-string/vuln.c` — stesso schema
 dell'esempio 02 (corruzione di `flag` via `%n`), compilato due volte da
 `build.sh`: `~student/bin/i386/vuln-format-off` (`printf(buf)`, vulnerabile) e
 `~student/bin/i386/vuln-format-on` (`printf("%s", buf)`, sicuro) — slide

@@ -1,6 +1,6 @@
 # 11 — Anti-debugging: self-debugging con `ptrace` (`antidebug`)
 
-Sorgente: `src/10-anti-debug/antidebug.c` — binario compilato in
+Sorgente: `src/11-anti-debug/antidebug.c` — binario compilato in
 `~student/bin/<arch>/antidebug` (slide SS_1.3, 32-36, dove `<arch>` è
 `i386`/`x64` sulla variante amd64 o `arm64` sulla variante arm64). Il programma chiama
 `ptrace(PTRACE_TRACEME, ...)`: se un debugger lo sta già tracciando,

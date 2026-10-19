@@ -1,6 +1,6 @@
 # 09 — Static analysis: segreto hardcoded (`guessmyname`)
 
-Sorgente: `src/08-static-secret/guessmyname.c` — binario compilato in
+Sorgente: `src/09-static-secret/guessmyname.c` — binario compilato in
 `~student/bin/<arch>/guessmyname` (slide SS_1.3, 10-14), dove `<arch>` è
 `i386`/`x64` sulla variante amd64 o `arm64` sulla variante arm64 (vedi
 tabella arch-per-esempio in cima a `solutions/README.md`). La risposta

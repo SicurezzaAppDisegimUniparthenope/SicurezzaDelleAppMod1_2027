@@ -1,6 +1,6 @@
 # 06 — Memory corruption: sovrascrittura di variabile (`override`)
 
-Sorgente: `src/05-var-override/override.c` — binario compilato in
+Sorgente: `src/06-var-override/override.c` — binario compilato in
 `~student/bin/i386/override` (slide SS_2.1, 8-16). `buffer[12]` e `variable`
 sono adiacenti sullo stack: un input più lungo di 12 byte trabocca su
 `variable`.
