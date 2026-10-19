@@ -8,7 +8,9 @@ name: Build and publish vulnbox image
 # emulazione QEMU, vedi TODO-multiarch.md per il perché):
 # - amd64: toolchain multilib, esempi sia a 32 bit (gcc -m32, bin/i386/)
 #   che 64 bit (gcc -m64, bin/x64/) nella stessa immagine. Runner
-#   GitHub-hosted "ubuntu-latest" è amd64 nativo. Tag :latest (storico,
+#   GitHub-hosted "ubuntu-24.04" è amd64 nativo (pinnato esplicitamente
+#   invece di "ubuntu-latest", che migrerà a Ubuntu 26 dal 2026-10-19;
+#   coerente con "ubuntu-24.04-arm" usato per arm64). Tag :latest (storico,
 #   invariato per non rompere i "docker pull" esistenti degli studenti) +
 #   :<release>.
 # - arm64: esempi a 64 bit nativi (bin/arm64/), niente variante a 32 bit
@@ -42,7 +44,7 @@ jobs:
       matrix:
         include:
           - arch: amd64
-            runner: ubuntu-latest
+            runner: ubuntu-24.04
             platform: linux/amd64
           - arch: arm64
             runner: ubuntu-24.04-arm
