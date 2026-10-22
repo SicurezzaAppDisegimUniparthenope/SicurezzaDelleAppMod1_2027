@@ -83,9 +83,17 @@ RUN pip3 install --break-system-packages --no-cache-dir --upgrade pip \
 # 03-ret2libc/04-rop a 64 bit su arm64. Non influenza le build amd64
 # (il codepath ARM64 di ROPgadget non viene mai eseguito lì).
 
-# PEDA: estensione GDB leggera (puro Python, nessuna dipendenza compilata),
-# più affidabile di pwndbg da compilare sotto emulazione i386/QEMU.
-RUN git clone --depth 1 https://github.com/longld/peda.git /opt/peda
+# Estensioni GDB. Entrambe sono puro Python (nessuna dipendenza compilata),
+# quindi affidabili anche sotto emulazione i386/QEMU — a differenza di
+# pwndbg, che richiede una build e per questo era stato scartato.
+#  - GEF (default, in ~/.gdbinit): più moderno e mantenuto, 90+ comandi,
+#    supporta x86/x86-64/ARM/AArch64; pinnato a un tag di release per
+#    build riproducibili (GDB 13.1 / Python 3.11 della bookworm-slim sono
+#    ampiamente sopra i minimi richiesti da GEF).
+#  - PEDA: conservato e raggiungibile col wrapper `gdb-peda` (vedi sotto),
+#    così chi lo preferisce o segue materiale che lo cita non perde nulla.
+RUN git clone --depth 1 --branch 2026.01 https://github.com/hugsy/gef.git /opt/gef \
+    && git clone --depth 1 https://github.com/longld/peda.git /opt/peda
 
 # "student": account senza sudo, usato per gli esercizi (stessi permessi
 # di un utente non privilegiato del sistema target). "vulnbox": account con
@@ -93,14 +101,14 @@ RUN git clone --depth 1 https://github.com/longld/peda.git /opt/peda
 # sistema, ecc.).
 RUN useradd -m -s /bin/bash student \
     && echo 'student:student' | chpasswd \
-    && echo "source /opt/peda/peda.py" > /home/student/.gdbinit \
+    && echo "source /opt/gef/gef.py" > /home/student/.gdbinit \
     && echo 'export PATH="$HOME/bin:$PATH"' >> /home/student/.bashrc \
     && chown student:student /home/student/.gdbinit /home/student/.bashrc \
     && useradd -m -s /bin/bash vulnbox \
     && echo 'vulnbox:vulnbox' | chpasswd \
     && usermod -aG sudo vulnbox \
     && echo 'vulnbox ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/vulnbox \
-    && echo "source /opt/peda/peda.py" > /home/vulnbox/.gdbinit \
+    && echo "source /opt/gef/gef.py" > /home/vulnbox/.gdbinit \
     && echo 'export PATH="$HOME/bin:$PATH"' >> /home/vulnbox/.bashrc \
     && chown vulnbox:vulnbox /home/vulnbox/.gdbinit /home/vulnbox/.bashrc
 
@@ -124,8 +132,9 @@ COPY vuln-gcc /usr/local/bin/vuln-gcc
 COPY vuln-gcc64 /usr/local/bin/vuln-gcc64
 COPY run-noaslr /usr/local/bin/run-noaslr
 COPY vulnbox_ver /usr/local/bin/vulnbox_ver
+COPY gdb-peda /usr/local/bin/gdb-peda
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /usr/local/bin/vuln-gcc /usr/local/bin/vuln-gcc64 /usr/local/bin/run-noaslr /usr/local/bin/vulnbox_ver /entrypoint.sh
+RUN chmod +x /usr/local/bin/vuln-gcc /usr/local/bin/vuln-gcc64 /usr/local/bin/run-noaslr /usr/local/bin/vulnbox_ver /usr/local/bin/gdb-peda /entrypoint.sh
 
 # Versione dell'immagine (release + commit) fissata al build e letta a
 # runtime dal comando `vulnbox_ver` (in PATH per entrambi gli account).

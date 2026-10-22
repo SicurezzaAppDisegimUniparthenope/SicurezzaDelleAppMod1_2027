@@ -212,12 +212,16 @@ scopo del container, già deliberatamente vulnerabile.
   `pwn checksec ./vulnerabile` per controllare canary/NX/PIE/RELRO sul
   binario compilato.
 
-- **gdb**: incluso [PEDA](https://github.com/longld/peda) (già configurato
-  in `~/.gdbinit` per entrambi gli utenti) per ispezionare stack/registri
-  durante il debug degli esempi ROP/JOP. Funziona sia live che
-  post-mortem su host x86_64 reale e sulla variante **arm64 nativa**;
-  **solo post-mortem** sulla variante amd64 emulata su Apple Silicon
-  (vedi sopra).
+- **gdb**: di default usa [GEF](https://github.com/hugsy/gef) (già
+  configurato in `~/.gdbinit` per entrambi gli utenti, pinnato alla
+  release `2026.01`) per ispezionare stack/registri durante il debug
+  degli esempi ROP/JOP. In alternativa è incluso anche
+  [PEDA](https://github.com/longld/peda), raggiungibile col comando
+  `gdb-peda` (che salta `~/.gdbinit` con `-nx` e carica PEDA al posto di
+  GEF); il gdb "liscio" resta disponibile con `gdb -nx`. Entrambe le
+  estensioni funzionano sia live che post-mortem su host x86_64 reale e
+  sulla variante **arm64 nativa**; **solo post-mortem** sulla variante
+  amd64 emulata su Apple Silicon (vedi sopra).
 
 - **Tool exploit dev**: `pwntools`, `ropper`/`ROPgadget` (ricerca gadget
   per ROP/JOP — su arm64, `pwntools.ROP()` richiede il fix
