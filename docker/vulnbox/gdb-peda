@@ -1,0 +1,7 @@
+#!/bin/sh
+# Avvia gdb con PEDA invece dell'estensione di default (GEF, caricata da
+# ~/.gdbinit). `-nx` salta l'init utente — quindi NON carica GEF — e poi
+# carica PEDA a mano: utile a chi preferisce PEDA o segue materiale che lo
+# cita. Il gdb "liscio" resta disponibile con `gdb -nx`.
+# Uso: gdb-peda ./prog     (stessi argomenti di gdb)
+exec gdb -q -nx -ex "source /opt/peda/peda.py" "$@"
