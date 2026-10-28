@@ -1,6 +1,6 @@
 # =====================================================================
 #  Makefile aggregato - esercizi/parte1
-#  Costruisce TUTTE le lezioni (ogni sottocartella che contiene esame.tex,
+#  Costruisce TUTTE le lezioni (ogni sottocartella che contiene esercitazione.tex,
 #  incluse quelle aggiunte in futuro) e raccoglie i PDF prodotti:
 #    esercitazioni/<lezione>.pdf  -> domande SENZA soluzioni
 #    soluzioni/<lezione>.pdf      -> domande CON soluzioni
@@ -15,10 +15,10 @@
 
 SHELL := /bin/bash
 
-# Sottocartelle-lezione: tutte quelle che contengono un esame.tex.
+# Sottocartelle-lezione: tutte quelle che contengono un esercitazione.tex.
 # Le cartelle di output (esercitazioni, soluzioni, release-assets) non lo
 # contengono, quindi vengono escluse automaticamente.
-LESSONS := $(patsubst %/,%,$(dir $(wildcard */esame.tex)))
+LESSONS := $(patsubst %/,%,$(dir $(wildcard */esercitazione.tex)))
 
 ESERCIT := esercitazioni
 SOLUZ   := soluzioni
@@ -33,7 +33,7 @@ $(LESSONS):
 	@echo "==> Lezione: $@"
 	@$(MAKE) --no-print-directory -C $@
 	@mkdir -p $(ESERCIT) $(SOLUZ)
-	@cp -f $@/esame.pdf     $(ESERCIT)/$@.pdf
+	@cp -f $@/esercitazione.pdf     $(ESERCIT)/$@.pdf
 	@cp -f $@/soluzioni.pdf $(SOLUZ)/$@.pdf
 	@echo "    -> $(ESERCIT)/$@.pdf , $(SOLUZ)/$@.pdf"
 

@@ -57,7 +57,7 @@
   \begin{center}
     {\Large\bfseries Sicurezza delle Applicazioni e IA per la Cybersecurity -- Modulo 1}\\[2pt]
     {\large \lezionenome}\\[3pt]
-    {\normalsize Esercizi d'esame \titolovariante}\\[6pt]
+    {\normalsize Esercitazione \titolovariante}\\[6pt]
     {\footnotesize Universit\`a degli Studi di Napoli ``Parthenope'' -- DISEGIM -- A.A.\ 2026/2027 -- Dr.\ Andrea Bruno}
   \end{center}
   \vspace{2pt}\hrule\vspace{6pt}
@@ -65,3 +65,24 @@
   \noindent Totale punti: \numpoints.\quad Tempo: 90 minuti.\quad Motivare sempre le risposte.
   \vspace{4pt}\hrule\vspace{12pt}
 }
+
+% ---- spazio per la risposta ----
+% Nell'esercitazione (senza soluzioni) il corpo di ogni ambiente
+% solution viene scartato e al suo posto restano delle righe vuote su cui
+% scrivere; con \printanswers (soluzioni.tex) compare la soluzione.
+\usepackage{comment}
+\newcommand{\altezzarisposta}{5cm}
+\ifprintanswers\else
+  \let\solution\relax\let\endsolution\relax
+  \excludecomment{solution}
+  \let\saltasoluzione\solution
+  \def\solution{\par\fillwithlines{\altezzarisposta}\saltasoluzione}
+\fi
+
+% ---- \fullwidth prima della prima \question ----
+% Le versioni recenti di TeX Live segnalano "missing \item" se \fullwidth
+% apre un paragrafo prima del primo \item: azzera il flag di lista nuova.
+\makeatletter
+\let\oldfullwidth\fullwidth
+\renewcommand{\fullwidth}[1]{\@newlistfalse\oldfullwidth{#1}}
+\makeatother

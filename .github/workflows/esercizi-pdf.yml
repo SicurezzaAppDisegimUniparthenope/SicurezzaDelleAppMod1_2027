@@ -4,7 +4,7 @@ name: Build and attach esercizi PDFs
 # della release. Non versioniamo i PDF nel repo: li produce la CI a ogni
 # release (una release per lezione, con bump di versione).
 #
-# Per ogni lezione (ogni sottocartella con esame.tex, rilevata in automatico
+# Per ogni lezione (ogni sottocartella con esercitazione.tex, rilevata in automatico
 # dal Makefile di parte1 - le lezioni future si aggiungono da sole) vengono
 # allegati due file:
 #   <lezione>-esercitazione.pdf  -> domande SENZA soluzioni (per gli studenti)
