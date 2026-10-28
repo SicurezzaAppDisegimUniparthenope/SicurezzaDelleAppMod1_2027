@@ -14,68 +14,115 @@ Linux i386 easily enough, as for other architectures, it may not be
 possible") sia la lezione stessa trattano solo questa variante — nessun
 binario né script per amd64-64/arm64.
 
-## Perché serve una malloc diversa da quella di sistema (verificato)
+## Perché serve una malloc diversa da quella di sistema
 
 La glibc di Debian bookworm (2.36) ha controlli di integrità su
-`unlink()` (ossia sul passo cruciale di questo attacco) che bloccano
-esattamente la tecnica delle slide. **Soluzione adottata** (decisione
-dell'utente in questa sessione): compilare `heap-three` linkato
-staticamente contro la **stessa** `malloc-2.7.2.c` citata nel commento
-originale di Phoenix (`src/19-heap-three/malloc-2.7.2.c`, scaricata da
+`unlink()` che bloccano esattamente la tecnica delle slide. **Soluzione
+adottata**: compilare `heap-three` linkato staticamente contro la
+**stessa** `malloc-2.7.2.c` citata nel commento originale di Phoenix
+(`src/19-heap-three/malloc-2.7.2.c`, scaricata da
 <https://gee.cs.oswego.edu/pub/misc/malloc-2.7.2.c>, **SHA1 verificato
 uguale** a quello nel commento: `407329d164e4989b59b9a828760acb720dc5c7db`).
 `build.sh` compila quel file come oggetto e lo linka insieme a
 `heap-three.c` (nessuna flag `USE_DL_PREFIX`: esporta `malloc`/`free`
 con i nomi standard, sovrascrivendo quelli di libc per interposizione di
-simboli — stessa tecnica di collegamento dichiarata dal commento
-originale di Phoenix). **Verificato**:
+simboli). Verificato: il binario risultante usa davvero questa malloc
+(`nm` mostra `malloc`/`free` definiti nel binario stesso), e la macro
+`unlink()` di `malloc-2.7.2.c` non ha controlli di integrità.
 
-- Il binario risultante usa davvero questa malloc (`nm` mostra `malloc`/
-  `free` definiti nel binario stesso, non importati da `libc.so.6`).
-- La macro `unlink()` di `malloc-2.7.2.c` **non ha controlli di
-  integrità** (nessun check `P->fd->bk == P`, introdotto nelle glibc
-  moderne dopo CVE storiche): esattamente la condizione che serve.
-- Il binario compila ed esegue correttamente (`dynamite failed?`,
-  comportamento base verificato).
+## L'exploit (`exploit.py`) — **verificato funzionante, eseguito più volte**
 
-## Stato dell'exploit: tecnica documentata, script NON completato in questa sessione
+A differenza degli altri esempi di questa lezione, questo **non è** uno
+script argv-based "usa e getta": serve correggere, con un payload a 3
+chunk, alcuni campi interni dell'allocatore (soglia reale del fastbin,
+bit `PREV_INUSE` del chunk "successivo") che non sono raggiungibili
+dall'esterno del processo senza una sonda live. `exploit.py` usa quindi
+l'**API Python di GDB** per scrivere il payload direttamente in memoria
+con breakpoint dopo ogni `malloc()`/prima di ogni `free()` — nello
+spirito della demo della slide stessa (che usa GDB per lo stesso
+motivo). Uso:
 
-L'attacco (dalle slide "L'idea dell'exploit"/"L'exploit", riassunto):
+```sh
+gdb -q --batch -x exploit.py
+```
 
-1. **Chunk A**: 4 byte di padding (NOP) + shellcode.
-2. **Chunk B**: padding (32 byte) + `prev_size` e `size` **falsi** per
-   il Chunk C, costruiti così che `free(c)` creda che il chunk
-   "precedente" (in realtà dati di B sotto controllo dell'attaccante)
-   sia libero e vada consolidato.
-3. **Chunk C**: 4 byte di padding + due parole da 4 byte interpretate da
-   `unlink()` come `P->fd` e `P->bk` del chunk falso: scegliendo
-   `P->fd = GOT(puts) - 4` e `P->bk = <indirizzo verso cui puntare>`,
-   la macro `unlink` (`FD->bk = BK; BK->fd = FD;`) scrive `P->bk`
-   all'indirizzo GOT di `puts()` — la `printf("dynamite failed?\n")`
-   finale (che gcc traduce in una `call puts@plt`, verificato via
-   `objdump -R`) finisce quindi per saltare lì invece che alla vera
-   `puts()`.
+Nessun indirizzo è hardcoded: quello di `winner()` si legge dal binario
+(debug info), quello GOT di `puts()` da `objdump -R`, e gli indirizzi
+delle chiamate a `malloc()`/`free()` dentro `main()` dal disassembly —
+tutti ricavati a runtime, quindi lo script resta valido anche se il
+binario viene ricompilato con offset leggermente diversi. **Non serve
+disabilitare l'ASLR**: ogni indirizzo (chunk, `argv[1]`) viene letto
+dallo stesso processo in esecuzione sotto gdb, mai riusato tra lanci
+diversi — verificato funzionante sia con `setarch i386 -R` sia con
+ASLR realmente attiva.
 
-Il dettaglio delicato (via che le slide risolvono con "uno shellcode che
-spinge l'indirizzo sullo stack, poi `ret`", invece di scrivere
-direttamente l'indirizzo di `winner()`): la stessa `unlink()` esegue
-*anche* una seconda scrittura (`FD->bk = BK`, cioè 4 byte a
-`P->fd + 4`) come effetto collaterale sulla destinazione scelta per
-`P->bk` — se si punta `P->bk` direttamente a `winner()`, quei 4 byte di
-`winner()` stesso vengono corrotti prima ancora di poterla eseguire.
-Per questo l'attacco reale punta `P->bk` all'inizio del **Chunk A**
-(dove l'effetto collaterale sovrascrive solo i 4 byte di padding NOP,
-non il payload vero) e lo shellcode nel Chunk A è quello che poi salta a
-`winner()`.
+### La tecnica passo passo
 
-**Non è stato portato a termine in questa sessione** (offset esatti del
-payload, verifica bit-a-bit con un corefile) — a differenza degli altri
-3 esempi di questa lezione, qui non c'è ancora uno `exploit.py`
-verificato. La costruzione del binario/toolchain sopra **è** verificata
-e pronta; resta da costruire e testare il payload a 3 chunk descritto.
-Prossimo passo naturale per chi riprende il lavoro: ripetere l'analisi
-con GDB della slide ("Analisi" — breakpoint dopo ogni `malloc()`/`free()`,
-`vmmap`) su questo binario per leggere gli offset reali tra i 3 chunk
-(probabilmente diversi da quelli della VM Phoenix originale, essendo
-un'allocatore diverso anche se stessa versione) prima di costruire il
-payload.
+1. **Chunk A**: contiene un piccolo trampolino macchina (`push
+   <winner>; ret`, 6 byte) scritto sopra `argv[1]` — eseguito più avanti
+   quando `puts()` verrà dirottato lì. (Il trampolino vive sullo *stack*,
+   dove risiedono i byte di `argv[1]`: l'heap di questa toolchain
+   **non è eseguibile** nemmeno con `-z execstack`, verificato — quel
+   flag riguarda solo il segmento `PT_GNU_STACK`, non l'intero processo
+   come nei vecchi binari senza quel segmento. Mettere il trampolino
+   direttamente sull'heap, come suggerirebbe una lettura superficiale
+   della slide, qui farebbe SIGSEGV al salto.)
+2. **Chunk B**: i suoi primi 8 byte diventano, agli occhi di `free()`,
+   i campi `fd`/`bk` di un "chunk libero precedente" fittizio `P`
+   (`P = b_chunkheader`). Si scrive `P->fd = argv1` (l'indirizzo del
+   trampolino) e `P->bk = GOT(puts) - 8`.
+3. **Chunk C**: il suo header viene corrotto (via quello che nella
+   slide sarebbe l'overflow da B, qui scritto direttamente per
+   chiarezza) con `prev_size` pari esattamente alla distanza fino a
+   `b_chunkheader`, e una `size` fittizia **sopra la vera soglia
+   `max_fast`** di questo binario (letta a runtime da `av_.max_fast`:
+   72 byte, non i 64 "di manuale" — la differenza è dovuta al
+   `request2size()` interno di dlmalloc) con il bit `PREV_INUSE` a 0.
+   Una size fittizia *sotto* quella soglia manda il chunk in un
+   **fastbin** invece che nel percorso di consolidamento che chiama
+   `unlink()` — il primo ostacolo reale incontrato costruendo questo
+   exploit.
+4. `free(c)`: vedendo `PREV_INUSE` a 0, dlmalloc tratta `P` come un
+   vero chunk libero adiacente e chiama `unlink(P, bck, fwd)`, che
+   esegue `FD->bk = BK` (scrive `GOT(puts)-8` a `argv1+12`, innocuo: è
+   dentro al trampolino/padding sullo stack) e `BK->fd = FD` (scrive
+   l'indirizzo del trampolino esattamente a `GOT(puts)-8+8 =
+   GOT(puts)`). **Qui avviene l'overwrite della GOT.**
+
+Il resto dello script (commentato riga per riga) ripara alcuni effetti
+collaterali reali della consolidazione per evitare `SIGSEGV` *dopo*
+l'overwrite, prima di arrivare alla `printf()` finale:
+
+- `free(c)` fonde (realmente, nell'allocatore) B+C in un chunk unico,
+  riscrivendo l'header di B — ma il programma chiama comunque `free(b)`
+  subito dopo come se fosse indipendente. Si ripristina l'header di B a
+  un valore piccolo "in uso" (come l'originale) perché prenda la via
+  semplice del fastbin.
+- Il chunk "successivo" a quello fittizio (dopo C) cade nella
+  wilderness (memoria mai scritta, letta come `0`): senza intervento,
+  `free()` la tratterebbe come un altro chunk libero da fondere e
+  tenterebbe un `unlink()` su `fd=bk=0`, cioè un null-deref. Si forza il
+  suo bit `PREV_INUSE` a 1.
+- La stessa verifica si ripete più avanti (alla primissima allocazione
+  del buffer `stdio` interno di `printf()`, **dentro `winner()` stessa**,
+  quando `malloc_consolidate()` ripercorre i fastbin di A e B): va
+  ri-applicata la stessa correzione sull'header di C.
+
+Nessuna di queste correzioni altera l'obiettivo pedagogico (l'overwrite
+della GOT via `unlink()`, il cuore della lezione): sono conseguenze
+inevitabili di un vero allocatore che, dopo l'exploit, continua a girare
+fino alla `printf()` finale invece di fermarsi lì.
+
+### Risultato
+
+```
+GOT(puts) sovrascritta con il trampolino: 0xffffdf13
+Level was successfully completed at @ 1793182214 seconds past the Epoch
+[Inferior 1 (process 1183) exited normally]
+```
+
+La riga `Level was successfully completed...` è il messaggio di
+`winner()` — eseguito al posto di `puts()`, confermato anche da un
+backtrace (`winner() at heap-three.c:47` → `main() at heap-three.c:66`)
+preso durante lo sviluppo di questo script. Verificato più volte di
+seguito, sia con ASLR disabilitata sia con ASLR realmente attiva.

@@ -33,6 +33,15 @@ sullo **stack**.
   possibilità realistica di raggiungere lo stack su questo layout di
   memoria: prima incontra (ed eventualmente corrompe fino al crash) solo
   altra memoria dell'arena heap.
+- **Confermato anche su host x86_64 reale** (`bruand81.it`, nativo,
+  nessuna emulazione QEMU): stesso programma diagnostico, stesso
+  binario i386 — heap verso `0x0809...`, stack verso `0xffca...`,
+  **quasi 4 GB di distanza**, anche peggiore che sotto emulazione. Non è
+  quindi un artefatto dell'emulazione QEMU/ARM64: è una differenza
+  strutturale tra il layout di memoria dei kernel Linux moderni (stack
+  posizionato molto in alto, vicino al limite dello spazio utente a 32
+  bit) e quello della VM Phoenix originale (kernel ~2011, layout
+  pre-ASLR-moderna con stack molto più vicino all'heap).
 
 ## Perché non è stato forzato un exploit alternativo
 
