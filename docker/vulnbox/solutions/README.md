@@ -32,6 +32,10 @@ tramite il proprio account.
 | [13](13-countermeasure-canary/README.md) | `vuln-canary-off`/`-on` | SS_2.4, slide 12-19 | Countermeasure: Stack Canary | ✅ | ✅ | ✅ |
 | [14](14-countermeasure-aslr/README.md) | `aslr` | SS_2.4, slide 25-29 | Countermeasure: ASLR | ✅ | ✅ | ✅ |
 | [15](15-countermeasure-format-string/README.md) | `vuln-format-off`/`-on` | SS_2.2, slide 25 | Countermeasure: mitigazione format string | ✅ | ✅ | ✅ |
+| [16](16-heap-zero/README.md) | `heap-zero` | Lezione 6 (HEAP-BASED Buffer OVERFLOW) | Heap-based overflow: sovrascrittura di function pointer | ✅ | ✅ | ✅ |
+| [17](17-heap-one/README.md) | `heap-one` | Lezione 6 | Heap-based overflow: tecnica delle slide non riprodotta su questa libc (vedi README) | ⚠️ (crash, non l'exploit) | ❌ | ❌ |
+| [18](18-heap-two/README.md) | `heap-two` | Lezione 6 | Heap-based overflow: puntatore stantio dopo `free()`/riuso | ✅ | ✅ | ✅ |
+| [19](19-heap-three/README.md) | `heap-three` | Lezione 6 | Heap-based overflow: attacco a `unlink()` (dlmalloc 2.7.2) — build pronta, exploit non completato (vedi README) | ⚠️ (vedi README) | — | — |
 
 Nessuna variante **arm64-32bit (armhf)**: non disponibile su host Apple
 Silicon (verificato, vedi `README.md` principale) — non è quindi in
