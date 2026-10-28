@@ -99,10 +99,13 @@ RUN git clone --depth 1 --branch 2026.01 https://github.com/hugsy/gef.git /opt/g
 # di un utente non privilegiato del sistema target). "vulnbox": account con
 # sudo NOPASSWD, per il docente/setup (installare pacchetti, ispezionare il
 # sistema, ecc.).
+# Il prompt usa l'hostname fisso "vulnbox" (non \h): con `docker run` senza
+# --hostname, \h sarebbe l'hash del container.
 RUN useradd -m -s /bin/bash student \
     && echo 'student:student' | chpasswd \
     && echo "source /opt/gef/gef.py" > /home/student/.gdbinit \
     && echo 'export PATH="$HOME/bin:$PATH"' >> /home/student/.bashrc \
+    && echo "PS1='\\u@vulnbox:\\w\\$ '" >> /home/student/.bashrc \
     && chown student:student /home/student/.gdbinit /home/student/.bashrc \
     && useradd -m -s /bin/bash vulnbox \
     && echo 'vulnbox:vulnbox' | chpasswd \
@@ -110,6 +113,7 @@ RUN useradd -m -s /bin/bash student \
     && echo 'vulnbox ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/vulnbox \
     && echo "source /opt/gef/gef.py" > /home/vulnbox/.gdbinit \
     && echo 'export PATH="$HOME/bin:$PATH"' >> /home/vulnbox/.bashrc \
+    && echo "PS1='\\u@vulnbox:\\w\\$ '" >> /home/vulnbox/.bashrc \
     && chown vulnbox:vulnbox /home/vulnbox/.gdbinit /home/vulnbox/.bashrc
 
 RUN mkdir -p /var/run/sshd /home/student/src \
