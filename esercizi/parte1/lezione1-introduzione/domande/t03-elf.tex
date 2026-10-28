@@ -1,0 +1,9 @@
+\question[5]
+(a) Elenca i tre tipi di file oggetto ELF.
+(b) Per ciascuna sezione \lstinline|.text|, \lstinline|.rodata|, \lstinline|.data|, \lstinline|.bss|, \lstinline|.symtab| indica cosa contiene.
+(c) Quale di queste \emph{non} occupa spazio nel file e perché?
+\begin{solution}
+(a) File \textbf{rilocabile} (\lstinline|.o|), file \textbf{eseguibile}, \textbf{oggetto condiviso} (\lstinline|.so|).\\
+(b) \lstinline|.text| = istruzioni eseguibili; \lstinline|.rodata| = costanti di sola lettura (stringhe, messaggi); \lstinline|.data| = variabili globali inizializzate; \lstinline|.bss| = variabili globali non inizializzate; \lstinline|.symtab| = tabella dei simboli.\\
+(c) \lstinline|.bss|: viene semplicemente azzerata in memoria al caricamento, quindi non serve memorizzarne i byte nel file.
+\end{solution}

@@ -1,0 +1,7 @@
+\question[6]
+Hai un programma ricorsivo \lstinline|fib|. Scrivi i comandi \textbf{gdb} per: (a) impostare un breakpoint su \lstinline|fib| solo quando \lstinline|n == 2|; (b) avviare il programma; (c) stampare la catena delle chiamate; (d) stampare la variabile \lstinline|n|.
+Interpreta inoltre questo \lstinline|bt|: \lstinline|#0 fib (n=1) ... #1 fib (n=2) ... #2 main ()|.
+\begin{solution}
+(a) \lstinline|break fib if n==2|; (b) \lstinline|run|; (c) \lstinline|bt| (backtrace); (d) \lstinline|print n| (o \lstinline|p n|).\\
+Interpretazione: \lstinline|main| ha chiamato \lstinline|fib(n=2)|, che a sua volta ha chiamato \lstinline|fib(n=1)|. Il frame \lstinline|#0| è quello corrente (\lstinline|fib| con \lstinline|n=1|); salendo si risale fino a \lstinline|main| (\lstinline|#2|).
+\end{solution}

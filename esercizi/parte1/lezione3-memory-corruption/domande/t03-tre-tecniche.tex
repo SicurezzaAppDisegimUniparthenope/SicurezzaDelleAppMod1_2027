@@ -1,0 +1,17 @@
+\question[6]
+Confronta le tre tecniche degli esempi di laboratorio --- \textbf{override} (Es.\ 1), \textbf{corruption} (Es.\ 2), \textbf{shellcode} (Es.\ 3) --- indicando per ciascuna: cosa si sovrascrive, cosa si ottiene, le precondizioni e la difesa principale.
+\begin{solution}
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & \textbf{override} & \textbf{corruption} & \textbf{shellcode}\\
+\midrule
+Sovrascrive & variabile adiacente & return address & return address + stack\\
+Ottiene & dato controllato & salto a funzione esistente & esecuzione codice nuovo\\
+Precondizioni & buffer+var adiacenti & offset noto & offset + stack eseguibile\\
+Difesa & controllo dei limiti & canary / ASLR & NX / ASLR / canary\\
+\bottomrule
+\end{tabular}
+\end{center}
+Dalla corruzione di un dato all'esecuzione di codice arbitrario: complessità e impatto crescenti.
+\end{solution}

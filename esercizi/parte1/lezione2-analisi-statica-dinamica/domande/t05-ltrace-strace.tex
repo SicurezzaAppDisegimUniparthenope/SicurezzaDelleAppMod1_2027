@@ -1,0 +1,7 @@
+\question[5]
+\lstinline|ltrace| e \lstinline|strace|: cosa intercetta ciascuno e a quale confine del sistema si colloca?
+Perché su un binario con \textbf{linking statico} \lstinline|ltrace| non mostra le chiamate a libc?
+\begin{solution}
+\lstinline|ltrace| intercetta le chiamate alle funzioni di \textbf{libreria} (libc: \lstinline|printf|, \lstinline|strcmp|, \lstinline|malloc|); \lstinline|strace| intercetta le \textbf{system call} verso il kernel (\lstinline|read|, \lstinline|write|, \lstinline|open|, \lstinline|execve|).
+Con linking statico la libc è inclusa nel binario: le chiamate sono interne e non attraversano il confine del linking dinamico, quindi \lstinline|ltrace| non le vede (si usano \lstinline|strace| e gdb).
+\end{solution}

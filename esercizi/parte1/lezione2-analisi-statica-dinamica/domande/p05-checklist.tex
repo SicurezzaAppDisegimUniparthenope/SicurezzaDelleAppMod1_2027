@@ -1,0 +1,8 @@
+\question[5]
+Davanti a un binario sconosciuto, ordina i passi tipici di analisi
+(\lstinline|file|/\lstinline|readelf|, \lstinline|checksec|, \lstinline|strings|/\lstinline|nm|, \lstinline|objdump|, \lstinline|gdb|/\lstinline|ltrace|/\lstinline|strace| in sandbox).
+Perché l'analisi dinamica va fatta in un ambiente isolato?
+\begin{solution}
+Ordine ragionevole: (1) \lstinline|file| + \lstinline|readelf -h| (cos'è, architettura); (2) \lstinline|readelf -d| / \lstinline|checksec| (dipendenze, protezioni); (3) \lstinline|strings| + \lstinline|nm| (messaggi, simboli); (4) \lstinline|objdump -d| (logica, punti caldi); (5) \lstinline|gdb|/\lstinline|ltrace|/\lstinline|strace| in sandbox (valori a runtime); (6) modifica dello stato per verificare ipotesi.
+Isolamento: eseguire un binario ignoto (potenziale malware) è pericoloso $\to$ VM/container dedicati, rete isolata o assente, snapshot ripristinabili.
+\end{solution}

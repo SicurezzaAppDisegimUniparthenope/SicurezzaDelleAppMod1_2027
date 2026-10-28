@@ -1,0 +1,8 @@
+\question[4]
+Elenca i segmenti di memoria di un processo e indica la direzione di crescita di \textbf{stack} e \textbf{heap}.
+Dove vivono, rispettivamente, le variabili locali, le variabili globali e la memoria allocata dinamicamente?
+\begin{solution}
+Segmenti: codice, segmento dati (\lstinline|.data| inizializzate, \lstinline|.bss| non inizializzate), heap, stack (con gli argomenti \lstinline|argv|).
+Lo \textbf{stack} cresce verso gli indirizzi \textbf{bassi}, lo \textbf{heap} verso gli indirizzi \textbf{alti}.
+Variabili locali $\to$ stack; variabili globali $\to$ \lstinline|.data|/\lstinline|.bss|; memoria dinamica (\lstinline|malloc|) $\to$ heap.
+\end{solution}

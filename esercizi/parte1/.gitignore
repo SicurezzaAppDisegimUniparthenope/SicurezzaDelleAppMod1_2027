@@ -1,0 +1,5 @@
+# Output rigenerabili prodotti dal Makefile di parte1 (non versionati:
+# i PDF vengono generati dalla CI e allegati alle release di GitHub)
+esercitazioni/
+soluzioni/
+release-assets/

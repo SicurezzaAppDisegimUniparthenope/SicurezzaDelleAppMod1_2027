@@ -1,0 +1,8 @@
+\question[4]
+Spiega la differenza tra \textbf{linking statico} e \textbf{linking dinamico}, con un vantaggio e uno svantaggio per ciascuno.
+Come si verifica a posteriori da quali librerie dipende un ELF?
+\begin{solution}
+\textbf{Statico}: la libreria (es.\ libc) è copiata dentro il binario, che diventa autosufficiente; binario grande ma senza dipendenze esterne.
+\textbf{Dinamico}: il binario contiene solo riferimenti alle librerie, caricate a runtime (es.\ \lstinline|libc.so.6|); binario piccolo ma dipendente dall'ambiente e richiede rilocazione.
+Verifica delle dipendenze: \lstinline!readelf -d ./bin | grep NEEDED! oppure \lstinline|ldd ./bin|.
+\end{solution}

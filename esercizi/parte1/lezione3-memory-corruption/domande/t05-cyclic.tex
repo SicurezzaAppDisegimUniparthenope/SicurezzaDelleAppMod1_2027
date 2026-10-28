@@ -1,0 +1,5 @@
+\question[4]
+Spiega perché una sequenza ciclica (\textbf{de Bruijn}, \lstinline|cyclic|) permette di trovare l'offset del return address con una sola esecuzione.
+\begin{solution}
+In una sequenza di de Bruijn ogni finestra di $n$ byte (qui 4) compare una sola volta. Al crash i byte finiti in \lstinline|EIP| provengono da una posizione univoca del pattern: \lstinline|cyclic_find| la cerca e restituisce l'offset fino al return address.
+\end{solution}

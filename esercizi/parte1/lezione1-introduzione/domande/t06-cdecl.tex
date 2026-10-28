@@ -1,0 +1,7 @@
+\question[5]
+Nella convenzione \textbf{cdecl} (x86): dove passano gli argomenti, in che ordine vengono messi sullo stack, chi pulisce lo stack al termine e dove viene restituito il risultato?
+In System V x86-64 dove passano i primi sei argomenti interi/puntatore?
+\begin{solution}
+cdecl: argomenti \textbf{sullo stack}, inseriti da \textbf{destra verso sinistra}; è il \textbf{chiamante} a pulire lo stack dopo il ritorno (\lstinline|add esp, N|); il valore restituito è in \lstinline|eax|.
+System V x86-64: i primi 6 argomenti nei registri \lstinline|rdi, rsi, rdx, rcx, r8, r9| (gli ulteriori sullo stack).
+\end{solution}

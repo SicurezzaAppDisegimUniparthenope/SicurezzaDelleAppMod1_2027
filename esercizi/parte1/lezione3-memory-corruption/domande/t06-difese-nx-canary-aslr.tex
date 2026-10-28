@@ -1,0 +1,7 @@
+\question[6]
+Spiega \textbf{NX}, \textbf{stack canary} e \textbf{ASLR}. Perché NX da solo basta a fermare l'Es.\ 3 (shellcode) ma non l'Es.\ 2 (corruption)? Verso quali tecniche spinge la presenza di NX?
+\begin{solution}
+\textbf{NX} (W\textasciicircum{}X): pagine di stack/dati non eseguibili. \textbf{Stack canary}: un valore sentinella posto tra le variabili locali e il return address, verificato all'uscita dalla funzione; se è stato alterato, l'overflow viene rilevato. \textbf{ASLR}: randomizza gli indirizzi (stack, librerie), rendendoli imprevedibili.
+NX rende \emph{inerte} lo shellcode iniettato sullo stack (Es.\ 3). L'Es.\ 2 invece esegue codice \emph{già presente} nel binario (una funzione in \lstinline|.text|, eseguibile): NX non lo ferma.
+NX spinge verso tecniche che riusano codice esistente: \textbf{ret2libc}, \textbf{ROP}, \textbf{JOP}.
+\end{solution}

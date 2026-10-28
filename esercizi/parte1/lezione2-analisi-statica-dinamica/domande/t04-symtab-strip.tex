@@ -1,0 +1,6 @@
+\question[4]
+Qual è la differenza tra \lstinline|.symtab| e \lstinline|.dynsym|? Cosa rimuove il comando \lstinline|strip| e perché un binario strippato è più difficile da analizzare?
+\begin{solution}
+\lstinline|.symtab| contiene i simboli completi (anche funzioni e variabili locali) ed è usata dal debugger; \lstinline|.dynsym| contiene solo i simboli necessari al linking dinamico ed è sempre presente.
+\lstinline|strip| rimuove \lstinline|.symtab|: spariscono i nomi locali (es.\ \lstinline|deobfuscate|, \lstinline|secret_obf|), restano solo i simboli importati da libc. Senza nomi, ricostruire la logica richiede molto più lavoro.
+\end{solution}

@@ -1,0 +1,76 @@
+name: Build and attach esercizi PDFs
+
+# Compila gli esercizi d'esame (esercizi/parte1/) e allega i PDF come file
+# della release. Non versioniamo i PDF nel repo: li produce la CI a ogni
+# release (una release per lezione, con bump di versione).
+#
+# Per ogni lezione (ogni sottocartella con esame.tex, rilevata in automatico
+# dal Makefile di parte1 - le lezioni future si aggiungono da sole) vengono
+# allegati due file:
+#   <lezione>-esercitazione.pdf  -> domande SENZA soluzioni (per gli studenti)
+#   <lezione>-soluzioni.pdf      -> domande CON soluzioni (docente)
+#
+# Le soluzioni sono materiale pubblico (semplicemente non vengono distribuite
+# a lezione), quindi vengono allegate alla release. L'interruttore
+# ALLEGA_SOLUZIONI qui sotto resta come comodita': se in futuro servisse una
+# release con le sole esercitazioni, basta metterlo a "false".
+#
+# Si attiva alla pubblicazione di una release (come il workflow dell'immagine
+# vulnbox); con l'avvio manuale (workflow_dispatch) compila soltanto e carica
+# i PDF come artifact del run, senza toccare alcuna release.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+env:
+  # "true" (default) allega anche i PDF con soluzioni; "false" allega solo le
+  # esercitazioni (senza soluzioni).
+  ALLEGA_SOLUZIONI: "true"
+
+jobs:
+  build-esercizi:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Installa TeX Live (classe exam, listings, babel italiano)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            make latexmk \
+            texlive-latex-recommended \
+            texlive-latex-extra \
+            texlive-fonts-recommended \
+            texlive-lang-european
+
+      - name: Compila i PDF e prepara i file da allegare
+        run: make -C esercizi/parte1 release
+
+      - name: Carica i PDF come artifact del run (sempre)
+        uses: actions/upload-artifact@v7
+        with:
+          name: esercizi-pdf
+          path: esercizi/parte1/release-assets/*.pdf
+          if-no-files-found: error
+
+      - name: Allega i PDF alla release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          cd esercizi/parte1/release-assets
+          echo "Allego le esercitazioni (senza soluzioni) alla release $TAG"
+          gh release upload "$TAG" *-esercitazione.pdf --clobber
+          if [ "$ALLEGA_SOLUZIONI" = "true" ]; then
+            echo "Allego anche le soluzioni alla release $TAG"
+            gh release upload "$TAG" *-soluzioni.pdf --clobber
+          else
+            echo "ALLEGA_SOLUZIONI=false: le soluzioni NON vengono allegate alla release"
+          fi

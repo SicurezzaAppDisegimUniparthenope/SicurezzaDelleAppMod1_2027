@@ -1,0 +1,7 @@
+\question[4]
+Cosa fanno \lstinline|strings|, \lstinline|objdump| e \lstinline|readelf|?
+Di \lstinline|strings| indica la regola di default (lunghezza minima) e due suoi limiti.
+\begin{solution}
+\lstinline|strings| estrae le sequenze di caratteri stampabili; \lstinline|objdump| mostra header, sezioni e disassembly; \lstinline|readelf| legge in modo strutturato header ELF, segmenti e tabella dei simboli.
+Default di \lstinline|strings|: solo sequenze di \textbf{almeno 4 caratteri}. Limiti: non ha contesto (molti falsi positivi), non vede dati cifrati/compressi/offuscati, e un segreto corto (meno di 4 caratteri) sfugge.
+\end{solution}

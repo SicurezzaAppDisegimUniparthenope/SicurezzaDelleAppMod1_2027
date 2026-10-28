@@ -1,0 +1,7 @@
+\question[4]
+Perché nel payload l'indirizzo va scritto in \textbf{little-endian} e quale funzione pwntools lo gestisce?
+Su x86-64, cos'è la \textbf{forma canonica} di un indirizzo e cosa succede iniettando un indirizzo non canonico?
+\begin{solution}
+x86 è little-endian: il byte meno significativo va per primo; \lstinline|p32()|/\lstinline|p64()| lo fanno automaticamente.
+x86-64: solo i 48 bit meno significativi sono usati; i bit alti devono essere l'estensione di segno del bit 47 (forma canonica). Un indirizzo non canonico provoca un'eccezione.
+\end{solution}

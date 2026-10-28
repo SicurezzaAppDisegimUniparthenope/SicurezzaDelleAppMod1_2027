@@ -1,0 +1,7 @@
+\question[4]
+Cos'è un \textbf{breakpoint}, un \textbf{watchpoint} e un \textbf{catchpoint}?
+A cosa serve l'opzione \lstinline|gcc -g| e in quali sezioni ELF finiscono le informazioni di debug?
+\begin{solution}
+\textbf{Breakpoint}: ferma il programma quando si raggiunge un punto del codice. \textbf{Watchpoint}: ferma quando cambia il valore di un'espressione. \textbf{Catchpoint}: ferma al verificarsi di un evento (es.\ una \lstinline|syscall|).
+\lstinline|-g| fa emettere a gcc le informazioni di debug (formato DWARF), salvate nelle sezioni \lstinline|.debug_*| (es.\ \lstinline|.debug_line| per i numeri di riga).
+\end{solution}

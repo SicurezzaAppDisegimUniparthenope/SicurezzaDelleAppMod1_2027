@@ -1,0 +1,8 @@
+\question[5]
+Cosa contiene uno \textbf{stack frame} su x86-32? Qual è il ruolo di \lstinline|ESP| e \lstinline|EBP|?
+Indica almeno due differenze introdotte da x86-64.
+\begin{solution}
+Il frame contiene: gli argomenti della funzione, l'indirizzo di ritorno, il frame pointer precedente salvato (saved \lstinline|EBP|) e le variabili locali.
+\lstinline|ESP| è lo stack pointer (cima dello stack), \lstinline|EBP| è il frame/base pointer (riferimento per le variabili locali).
+x86-64: registri estesi a 64 bit (\lstinline|RSP|/\lstinline|RBP|), 8 registri in più, i primi 6 argomenti passati nei registri (non sullo stack) e una \emph{red zone} di 128 byte sotto \lstinline|RSP|.
+\end{solution}

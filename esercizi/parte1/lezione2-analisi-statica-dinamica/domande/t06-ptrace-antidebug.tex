@@ -1,0 +1,9 @@
+\question[5]
+(a) Perché \lstinline|gdb|, \lstinline|strace| e \lstinline|ltrace| dipendono tutti da \lstinline|ptrace|?
+(b) Spiega il meccanismo anti-debug \lstinline|ptrace(PTRACE_TRACEME)|: perché rivela la presenza di un debugger?
+(c) Cos'è \lstinline|TracerPid| in \lstinline|/proc/<pid>/status|?
+\begin{solution}
+(a) \lstinline|ptrace| è la system call che permette di fermare, ispezionare e controllare un altro processo: è il motore comune dei tre strumenti.\\
+(b) Un processo può avere un solo tracer alla volta. Se il programma chiama \lstinline|ptrace(PTRACE_TRACEME)| e la chiamata fallisce, un debugger lo sta già tracciando: il programma se ne accorge e reagisce.\\
+(c) \lstinline|TracerPid| è il PID del processo che sta tracciando il programma (0 se nessuno): un programma può leggerlo per capire se è sotto osservazione.
+\end{solution}

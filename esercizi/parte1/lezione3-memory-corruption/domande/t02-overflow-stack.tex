@@ -1,0 +1,6 @@
+\question[5]
+In che direzione un overflow di un buffer locale scrive rispetto allo stack frame? Quali elementi del frame può raggiungere e in quale ordine, partendo dal buffer?
+\begin{solution}
+Scrive verso gli indirizzi più alti, cioè verso la base del frame. Partendo dal buffer locale raggiunge prima gli eventuali altri byte/locali, poi il \textbf{saved EBP}, poi l'\textbf{indirizzo di ritorno}.
+Sovrascrivere il return address consente di dirottare il flusso di esecuzione (cuore dell'Es.\ 2).
+\end{solution}

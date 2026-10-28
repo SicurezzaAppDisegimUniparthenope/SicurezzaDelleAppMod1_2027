@@ -1,0 +1,7 @@
+\question[5]
+Su x86 (little-endian): (a) l'intero \lstinline|0x41424344| come appare come sequenza di 4 byte in memoria (dall'indirizzo più basso)? (b) La sequenza di byte \lstinline|10 00 00 00| quale intero rappresenta? (c) Perché \lstinline|p32()|/\lstinline|p64()| sono comode?
+\begin{solution}
+(a) \lstinline|44 43 42 41| (byte meno significativo per primo).\\
+(b) \lstinline|0x00000010| $=$ \textbf{16}.\\
+(c) Impacchettano automaticamente un intero nei byte in little-endian (p32 su 4 byte, p64 su 8), evitando errori manuali nell'ordine dei byte.
+\end{solution}

@@ -1,0 +1,7 @@
+\question[5]
+(a) Associa le opzioni di \lstinline|readelf| \lstinline|-h|, \lstinline|-S|, \lstinline|-d|, \lstinline|-x|, \lstinline|-l|, \lstinline|-s| al rispettivo output.
+(b) Se \lstinline|readelf -l| mostra \lstinline|GNU_STACK ... RWE|, quale protezione risulta disattivata e cosa implica?
+\begin{solution}
+(a) \lstinline|-h| header ELF; \lstinline|-S| elenco delle sezioni; \lstinline|-d| sezione dinamica (librerie \lstinline|NEEDED|); \lstinline|-x| dump esadecimale di una sezione; \lstinline|-l| segmenti di programma; \lstinline|-s| tabella dei simboli.\\
+(b) \lstinline|GNU_STACK| con permesso \lstinline|E| (RWE) significa \textbf{stack eseguibile} $\Rightarrow$ la protezione \textbf{NX è disattivata}: è possibile eseguire codice (shellcode) iniettato sullo stack.
+\end{solution}

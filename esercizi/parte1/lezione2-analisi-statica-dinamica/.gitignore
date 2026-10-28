@@ -1,0 +1,12 @@
+# Artefatti di compilazione LaTeX (rigenerabili con 'make')
+*.aux
+*.log
+*.out
+*.fls
+*.fdb_latexmk
+*.tmp
+*.toc
+*.synctex.gz
+esame.pdf
+soluzioni.pdf
+_preview_*.png

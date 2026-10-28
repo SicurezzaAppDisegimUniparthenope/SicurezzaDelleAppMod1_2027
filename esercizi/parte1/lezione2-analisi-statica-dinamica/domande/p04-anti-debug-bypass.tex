@@ -1,0 +1,8 @@
+\question[6]
+Il programma \lstinline|antidebug| (es.\ 11) esegue \lstinline|ptrace(PTRACE_TRACEME, 0, NULL, NULL)| e, se il risultato è \lstinline|< 0|, stampa ``Debugger rilevato'' ed esce.
+(a) Cosa stampa eseguito normalmente e cosa sotto gdb, e perché? (b) Scrivi la sequenza gdb che lo aggira facendolo proseguire. (c) Perché serve il cast \lstinline|(int)0|?
+\begin{solution}
+(a) Normale: ``Nessun debugger rilevato\ldots{} Operazione segreta eseguita''. Sotto gdb: ``Debugger rilevato! Uscita immediata.'', perché \lstinline|PTRACE_TRACEME| fallisce (gdb è già il tracer).\\
+(b) \lstinline|set confirm off| / \lstinline|break ptrace| / \lstinline|run| / \lstinline|return (int)0| / \lstinline|continue|: il controllo \lstinline|< 0| diventa falso.\\
+(c) \lstinline|ptrace| in libc non ha simboli di debug: senza tipo di ritorno, un semplice \lstinline|return 0| viene rifiutato; il cast fornisce il tipo (\lstinline|int|).
+\end{solution}

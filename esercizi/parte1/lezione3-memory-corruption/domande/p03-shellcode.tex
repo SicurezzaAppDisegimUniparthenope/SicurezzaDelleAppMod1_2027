@@ -1,0 +1,9 @@
+\question[7]
+In \lstinline|shellcode.c| (es.\ 08) \lstinline|char name[64]| è riempito da \lstinline|read(0, name, 300)|; il binario è compilato con \lstinline|-z execstack|.
+(a) Perché serve \lstinline|-z execstack|? (b) L'offset è 76: perché non 64? (c) Qual è la struttura del payload e come si ottiene lo shellcode? (d) Perché, in questo laboratorio, l'indirizzo di salto sullo stack è stabile tra le esecuzioni?
+\begin{solution}
+(a) Lo shellcode viene eseguito \emph{sullo stack}: senza stack eseguibile (cioè con NX attivo) non partirebbe.\\
+(b) Oltre ai 64 byte di \lstinline|name| ci sono altri byte (allineamento/altri salvataggi) e il saved EBP prima del return address $\to$ 76.\\
+(c) \lstinline|padding(76) + indirizzo_di_salto + shellcode|; lo shellcode è \textbf{generato} da pwntools (\lstinline|shellcraft|/\lstinline|asm|), non scritto a mano.\\
+(d) In questo lab l'ASLR non randomizza lo stack (esecuzione in QEMU user-mode, i386): l'indirizzo dello stack resta stabile, quindi si può puntare il return address direttamente allo shellcode. Difesa: NX, ASLR, stack canary.
+\end{solution}

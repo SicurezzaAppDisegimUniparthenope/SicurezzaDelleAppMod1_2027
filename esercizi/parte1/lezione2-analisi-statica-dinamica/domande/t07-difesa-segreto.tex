@@ -1,0 +1,8 @@
+\question[5]
+Perché \textbf{offuscare} un segreto nel binario (es.\ XOR con una chiave) non lo protegge davvero?
+Qual è una difesa migliore e qual è il limite di principio di ogni controllo lato-client?
+\begin{solution}
+Perché il programma, per usare il segreto (confrontarlo, elaborarlo), deve comunque riportarlo \textbf{in chiaro} a runtime: è osservabile con gdb o \lstinline|ltrace|.
+Difesa migliore: non materializzare mai il segreto in chiaro, ma confrontare l'\emph{hash} dell'input con un hash memorizzato.
+Limite: se il programma gira sulla macchina dell'attaccante, qualunque controllo locale è in principio aggirabile; la protezione reale sposta il segreto o la decisione su un lato fidato (un server).
+\end{solution}

@@ -1,0 +1,6 @@
+\question[5]
+Data la riga vulnerabile \lstinline|read(0, buffer, 300);| con \lstinline|char buffer[12];|, riscrivila in modo sicuro. Qual è il principio generale valido per tutti e tre gli esempi?
+\begin{solution}
+\lstinline|read(0, buffer, sizeof(buffer));| (o, se il contenuto va usato come stringa, \lstinline|read(0, buffer, sizeof(buffer)-1)| lasciando spazio al terminatore).
+Principio: non fidarsi mai della lunghezza dell'input; limitare sempre la scrittura alla dimensione del buffer, usando API con dimensione esplicita.
+\end{solution}

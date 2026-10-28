@@ -1,0 +1,67 @@
+% =====================================================================
+%  Preambolo condiviso per i documenti d'esame (classe exam)
+%  Sicurezza delle Applicazioni e IA per la Cybersecurity - Modulo 1
+%  UniParthenope - DISEGIM - A.A. 2026/2027 - Dr. Andrea Bruno
+%  babel italiano caricato solo se disponibile (IfFileExists).
+% =====================================================================
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\IfFileExists{italian.ldf}{\usepackage[italian]{babel}}{}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[hidelinks]{hyperref}
+
+% ---- colori per i listati ----
+\definecolor{codebg}{HTML}{F6F8FA}
+\definecolor{codekw}{HTML}{0033B3}
+\definecolor{codecm}{HTML}{6A737D}
+\definecolor{codestr}{HTML}{067D17}
+
+% ---- stile dei listati ----
+\lstset{
+  basicstyle=\small\ttfamily,
+  backgroundcolor=\color{codebg},
+  keywordstyle=\color{codekw}\bfseries,
+  commentstyle=\color{codecm}\itshape,
+  stringstyle=\color{codestr},
+  numbers=left, numberstyle=\tiny\color{codecm}, numbersep=6pt,
+  breaklines=true, showstringspaces=false,
+  frame=single, rulecolor=\color{codecm!40},
+  extendedchars=true, inputencoding=utf8,
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {°}{{\textdegree}}1,
+  aboveskip=0.6em, belowskip=0.6em
+}
+\lstdefinestyle{c}{language=C}
+\lstdefinestyle{py}{language=Python}
+\lstdefinestyle{sh}{language=bash, numbers=none}
+\lstdefinestyle{asm}{language={[x86masm]Assembler}, numbers=none}
+
+% ---- metadati sovrascrivibili dal driver ----
+\providecommand{\titolovariante}{}
+
+% ---- intestazione / piè di pagina (classe exam) ----
+\pagestyle{headandfoot}
+\runningheadrule
+\firstpageheader{\small Sic. App.\ -- Mod.\,1}{}{\small A.A.\ 2026/2027}
+\runningheader{\small Sic. App.\ -- Mod.1}{\small \lezionenome}{\small \thepage}
+\runningfooter{}{}{}
+\pointsinrightmargin
+\marginpointname{\,pt}
+
+\newcommand{\intestazione}{%
+  \begin{center}
+    {\Large\bfseries Sicurezza delle Applicazioni e IA per la Cybersecurity -- Modulo 1}\\[2pt]
+    {\large \lezionenome}\\[3pt]
+    {\normalsize Esercizi d'esame \titolovariante}\\[6pt]
+    {\footnotesize Universit\`a degli Studi di Napoli ``Parthenope'' -- DISEGIM -- A.A.\ 2026/2027 -- Dr.\ Andrea Bruno}
+  \end{center}
+  \vspace{2pt}\hrule\vspace{6pt}
+  \noindent\makebox[\textwidth][s]{\strut Cognome e nome: \underline{\hspace{6cm}}\hfill Matricola: \underline{\hspace{3.5cm}}}\\[6pt]
+  \noindent Totale punti: \numpoints.\quad Tempo: 90 minuti.\quad Motivare sempre le risposte.
+  \vspace{4pt}\hrule\vspace{12pt}
+}

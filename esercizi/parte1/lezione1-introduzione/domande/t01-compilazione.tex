@@ -1,0 +1,11 @@
+\question[4]
+Descrivi le \textbf{quattro fasi} della compilazione di un programma C con \lstinline|gcc|.
+Per ciascuna fase indica il comando \lstinline|gcc| corrispondente e l'output prodotto.
+\begin{solution}
+\begin{enumerate}[label=\arabic*.,nosep]
+  \item \textbf{Preprocessing} -- \lstinline|gcc -E hello.c|: espande le direttive del preprocessore (\lstinline|#include|, \lstinline|#define|) producendo codice C espanso.
+  \item \textbf{Compilazione} -- \lstinline|gcc -S hello.c|: traduce il C in assembly ($\to$ \lstinline|hello.s|).
+  \item \textbf{Assemblaggio} -- \lstinline|gcc -c hello.c|: traduce l'assembly in codice macchina ($\to$ \lstinline|hello.o|, file oggetto).
+  \item \textbf{Linking} -- \lstinline|gcc -o hello hello.o|: unisce i file oggetto e collega le librerie ($\to$ eseguibile \lstinline|hello|).
+\end{enumerate}
+\end{solution}

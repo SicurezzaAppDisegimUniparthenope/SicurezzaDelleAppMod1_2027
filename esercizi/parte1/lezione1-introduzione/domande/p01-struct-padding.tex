@@ -1,0 +1,7 @@
+\question[6]
+Dato \lstinline|struct A { char c; int i; short s; };| con allineamenti \lstinline|char| 1, \lstinline|short| 2, \lstinline|int| 4 (x86, gcc):
+(a) calcola \lstinline|sizeof(A)| mostrando la disposizione in memoria; (b) riordina i campi per minimizzare la dimensione e indica la nuova \lstinline|sizeof|.
+\begin{solution}
+(a) \lstinline|c|@0 (1 byte), padding 1--3, \lstinline|i|@4--7, \lstinline|s|@8--9, padding finale 10--11 (la struct è allineata a 4, il suo campo più grande) $\Rightarrow$ \textbf{12 byte}.\\
+(b) Ordine \lstinline|int i; short s; char c;|: \lstinline|i|@0--3, \lstinline|s|@4--5, \lstinline|c|@6, padding 7 $\Rightarrow$ \textbf{8 byte} (4 byte risparmiati).
+\end{solution}

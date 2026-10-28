@@ -1,0 +1,16 @@
+\question[5]
+Completa la tabella per i tre esempi del laboratorio: offset, struttura del payload e risultato ottenuto.
+\begin{solution}
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+Esempio & Offset & Payload & Risultato\\
+\midrule
+override   & 12 & \lstinline|padding + p32(valore)|          & variabile controllata\\
+corruption & 32 & \lstinline|padding + p32(&funzione)|        & funzione nascosta eseguita\\
+shellcode  & 76 & \lstinline|padding + indirizzo + shellcode| & shell interattiva\\
+\bottomrule
+\end{tabular}
+\end{center}
+Strumenti trasversali: \lstinline|cyclic| per l'offset, \lstinline|p32|/\lstinline|p64| per l'impacchettamento, \lstinline|process()| per l'invio.
+\end{solution}

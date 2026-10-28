@@ -1,0 +1,8 @@
+\question[6]
+Cosa restituiscono le seguenti chiamate di \textbf{pwntools}?
+\lstinline|p32(0xdeadbeef)|, \lstinline|cyclic(16)|, \lstinline|cyclic_find(b'daaa')|.
+A cosa serve la coppia \lstinline|cyclic| / \lstinline|cyclic_find| quando si cerca l'offset di un overflow?
+\begin{solution}
+\lstinline|p32(0xdeadbeef)| $=$ \lstinline|b'\xef\xbe\xad\xde'| (little-endian); \lstinline|cyclic(16)| $=$ \lstinline|b'aaaabaaacaaadaaa'|; \lstinline|cyclic_find(b'daaa')| $=$ \lstinline|12|.\\
+\lstinline|cyclic| genera una sequenza di de Bruijn in cui ogni finestra di 4 byte è unica: i 4 byte che finiscono in \lstinline|EIP| al crash identificano univocamente la posizione, e \lstinline|cyclic_find| restituisce l'offset fino al return address.
+\end{solution}

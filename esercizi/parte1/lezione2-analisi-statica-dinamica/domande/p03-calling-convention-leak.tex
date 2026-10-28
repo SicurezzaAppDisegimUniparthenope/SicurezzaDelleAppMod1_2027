@@ -1,0 +1,6 @@
+\question[5]
+Perché su \lstinline|guessmyname2| a 32 bit (i386) il segreto si legge con \lstinline|x/s *(char**)($esp+8)|, mentre sulla variante x86-64 andrebbe letto in un registro? Quale registro, e perché?
+\begin{solution}
+In i386 la convenzione \textbf{cdecl} passa gli argomenti sullo \textbf{stack}: dentro \lstinline|strcmp| il 1\textsuperscript{o} argomento è a \lstinline|esp+4|, il 2\textsuperscript{o} a \lstinline|esp+8|.
+In x86-64 (System V) i primi argomenti passano nei \textbf{registri}: il 1\textsuperscript{o} è in \lstinline|rdi|, il 2\textsuperscript{o} in \lstinline|rsi|; quindi il segreto si legge con \lstinline|x/s $rsi|.
+\end{solution}

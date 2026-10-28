@@ -1,0 +1,13 @@
+\question[6]
+(a) Dato lo snippet (sintassi Intel), indica il valore finale dei registri:
+\begin{lstlisting}[style=asm]
+mov eax, 5
+push eax
+pop ebx
+lea ecx, [ebx+8]
+\end{lstlisting}
+(b) Dati \lstinline|al| $=$ \lstinline|1100 1010| e \lstinline|bl| $=$ \lstinline|1010 0110|, calcola \lstinline|and al,bl|, \lstinline|or al,bl|, \lstinline|xor al,bl|.
+\begin{solution}
+(a) \lstinline|eax=5|, \lstinline|ebx=5|, \lstinline|ecx=13|. Nota: \lstinline|lea| calcola l'indirizzo \lstinline|ebx+8| senza accedere alla memoria.\\
+(b) \lstinline|and| $\to$ \lstinline|1000 0010| (0x82); \lstinline|or| $\to$ \lstinline|1110 1110| (0xEE); \lstinline|xor| $\to$ \lstinline|0110 1100| (0x6C).
+\end{solution}
