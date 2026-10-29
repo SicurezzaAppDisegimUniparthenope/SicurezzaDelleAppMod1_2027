@@ -69,6 +69,44 @@ anche nel processo successivo — stesso compromesso adottato in
 praticabile su questi binari). Shellcode generato con
 `shellcraft.amd64.linux.sh()`.
 
+## Variante host x86_64 nativo (`exploit-native.py`, `~student/bin/i386/shellcode`)
+
+`exploit.py` (come `exploit-x64.py`) trova l'offset da `p.corefile`: funziona
+**solo sotto QEMU user-mode**, dove è QEMU a scrivere un `core.<pid>` nella cwd
+— proprio dove pwntools lo cerca. Su un **host x86_64 nativo** (es. `bruand81.it`,
+vedi `docker/vulnbox/REMOTE.md`) i binari girano senza emulazione, quindi decide
+il kernel dell'host: `core_pattern` è tipicamente una **pipe** (su Ubuntu
+`|/usr/share/apport/apport …`), nessun file compare nella cwd e `p.corefile`
+fallisce con *"Could not find core file"*. Non è aggirabile con `ulimit -c` né
+cambiando `core_pattern` dal container (è del kernel host, non namespaced — stesso
+muro della variante arm64).
+
+`exploit-native.py` usa quindi lo stesso schema di `exploit-arm64.py`: **niente
+corefile**, si allega `gdb` al processo già lanciato da pwntools e si leggono
+`$eip`/`$esp`. Due accortezze specifiche:
+
+- **`gdb -nx`**: il gdb del container ha GEF, il cui init è lento abbastanza da
+  far crashare il processo *prima* che l'attach si completi (`Unable to attach:
+  program terminated`). `-nx` salta i file di init e rende l'attach immediato.
+- **`context.aslr = False`**: su host nativo l'ASLR randomizza davvero lo stack
+  (sotto QEMU no — per questo `exploit.py` non ne aveva bisogno), quindi
+  l'indirizzo "usa e getta" va reso stabile tra i due lanci (stessa scelta di
+  `exploit-x64.py`/`exploit-arm64.py`).
+
+Verificato su `bruand81.it`: `offset = 76` (coerente con `name[64]`), shell con
+`uid=1000(student)`. Su host nativo con ASLR *realmente* attiva servirebbe invece
+un vero gadget `jmp esp` risolto per ogni run (vedi i commenti di `exploit.py`).
+
+La versione a 64 bit è `exploit-x64-native.py` (`~student/bin/x64/shellcode`),
+con una finezza amd64 in più: un `ret` verso un indirizzo **non canonico** (gli
+8 byte di cyclic) fa faultare la CPU sull'istruzione `ret` stessa, *prima* di
+committare il pop. Due conseguenze, entrambe sfruttate: l'offset si legge da
+`*(unsigned long *)$rsp` (il return address corrotto è ancora in cima allo stack),
+e `$rsp` punta ancora **allo** slot del return address (non "subito dopo", come
+col corefile QEMU dove la pop era già avvenuta), quindi lo shellcode — che nel
+payload sta dopo il return address — si trova a `$rsp + 8`. Verificato su
+`bruand81.it`: shell con `uid=1000(student)`.
+
 ## Variante arm64 (`exploit-arm64.py`, `~student/bin/arm64/shellcode`)
 
 Stessa tecnica (`context.aslr = False`, nessun gadget `jmp/call sp`
