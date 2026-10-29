@@ -39,3 +39,6 @@ srcdocs/
 # Core dump lasciati da run interrotti degli exploit.py in docker/vulnbox/solutions/
 core.[0-9]*
 qemu_*.core
+Claude outputs/esame.pdf
+.gitignore
+Claude outputs/soluzioni.pdf
