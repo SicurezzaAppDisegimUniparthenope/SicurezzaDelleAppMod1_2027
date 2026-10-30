@@ -11,9 +11,17 @@ compilato in **fino a 3 varianti** dentro `~student/bin/`: `i386/` e `x64/`
 sezione dedicata per le varianti amd64-64/arm64 dove esistono differenze
 reali rispetto alla variante i386 di riferimento.
 
-Questa cartella è montata **solo** in `/home/vulnbox/solutions` (utente
-docente, con sudo), non in `/home/student` — gli studenti non ci accedono
-tramite il proprio account.
+Questa cartella vive in `/home/vulnbox/solutions` (utente docente, con sudo).
+È inoltre **inclusa nell'immagine pubblicata** (non solo montata via
+`docker-compose`): è quindi presente anche con un semplice `docker pull` +
+`docker run`, senza clonare il repo. Quando il docente usa il compose, il
+bind mount di `./solutions` la sovrascrive con la versione live dell'host.
+
+È accessibile in **lettura anche all'account `student`** (via il symlink
+`~student/solutions` → `/home/vulnbox/solutions`): gli studenti possono quindi
+consultare gli exploit risolti dal proprio account. Se si vuole tornare a
+riservarle al solo docente, rimuovere dal `Dockerfile` il symlink e il
+`chmod -R a+rX`, e impostare la cartella a `700`.
 
 | # | Esempio | Slide di riferimento | Tecnica | i386 | amd64-64 | arm64 |
 |---|---------|----------------------|---------|:---:|:---:|:---:|

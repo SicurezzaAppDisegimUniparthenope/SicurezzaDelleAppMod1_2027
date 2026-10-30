@@ -128,6 +128,23 @@ RUN mkdir -p /var/run/sshd /home/student/src \
 COPY src/ /home/student/src/
 RUN chown -R student:student /home/student/src
 
+# Copia anche le soluzioni nell'immagine, così sono presenti anche in un
+# `docker pull`/`docker run` della sola immagine pubblicata (senza clonare
+# il repo né il bind mount di docker-compose). Vivono in
+# /home/vulnbox/solutions (stesso path su cui il docente monta il proprio
+# ./solutions live, che quindi continua a sovrascriverle quando usa il
+# compose). Sono accessibili in LETTURA anche all'account student (scelta
+# esplicita dell'utente): /home/vulnbox è reso attraversabile e la cartella
+# world-readable; un symlink ~student/solutions le rende visibili dalla home
+# dello studente. NB: così gli studenti POSSONO leggere gli exploit risolti
+# collegandosi via SSH.
+COPY solutions/ /home/vulnbox/solutions/
+RUN chown -R vulnbox:vulnbox /home/vulnbox/solutions \
+    && chmod 755 /home/vulnbox \
+    && chmod -R a+rX /home/vulnbox/solutions \
+    && ln -s /home/vulnbox/solutions /home/student/solutions \
+    && chown -h student:student /home/student/solutions
+
 # Consente ptrace (necessario a gdb) senza disabilitare del tutto seccomp:
 # va comunque abbinato a `cap_add: SYS_PTRACE` nel docker-compose.yml.
 RUN echo 'kernel.yama.ptrace_scope = 0' > /etc/sysctl.d/10-ptrace.conf || true

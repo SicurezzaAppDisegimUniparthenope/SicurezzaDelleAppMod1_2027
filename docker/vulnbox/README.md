@@ -66,7 +66,9 @@ esempio sulle due architetture.
 ## Uso — studenti (immagine già pubblicata, consigliato)
 
 Non serve clonare il repo né buildare nulla: l'immagine su GitHub Container
-Registry contiene già gli esempi compilati al primo avvio.
+Registry contiene già gli esempi compilati al primo avvio, e le **soluzioni**
+(`solutions/`), consultabili dentro il container in `~student/solutions`
+(symlink a `/home/vulnbox/solutions`) da entrambi gli account.
 
 ```sh
 docker pull ghcr.io/sicurezzaappdisegimuniparthenope/vulnbox:latest
