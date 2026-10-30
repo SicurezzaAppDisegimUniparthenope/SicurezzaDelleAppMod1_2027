@@ -1,0 +1,7 @@
+\question[6]
+La macro \lstinline|unlink()| è il cuore degli attacchi heap più profondi. (a) Quali operazioni esegue per scollegare un chunk da un bin a lista doppia? (b) Come si trasforma in una primitiva \emph{write-what-where}? (c) Cos'è una primitiva write-what-where e perché è potente?
+\begin{solution}
+(a) Per togliere un chunk \lstinline|P| da una lista doppia, \lstinline|unlink()| legge \lstinline|fd| e \lstinline|bk| di \lstinline|P| e aggiorna i vicini: \lstinline|FD->bk = BK| e \lstinline|BK->fd = FD| --- due scritture in memoria. Viene invocata durante il consolidamento (es.\ \emph{consolidate backward} in \lstinline|free()|, se il chunk precedente è libero).\\
+(b) Se i puntatori \lstinline|fd| e \lstinline|bk| di \lstinline|P| sono \emph{falsificati} dall'attaccante (via overflow dei metadati), le due scritture non scollegano più un chunk reale ma diventano: ``scrivi \textbf{COSA} (\lstinline|BK|/\lstinline|FD|) all'indirizzo \textbf{DOVE} (\lstinline|FD->bk|/\lstinline|BK->fd|)''.\\
+(c) Una \emph{write-what-where} permette di scrivere un valore a scelta a un indirizzo a scelta: è il mattone di molti exploit (sovrascrivere un puntatore a funzione, una entry della GOT, un return address). \lstinline|heap-three| costruisce esattamente questa primitiva partendo da un overflow sull'heap.
+\end{solution}

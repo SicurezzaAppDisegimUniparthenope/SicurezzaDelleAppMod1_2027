@@ -1,0 +1,7 @@
+\question[6]
+Portando \lstinline|heap-zero| a 64 bit (x64/arm64) compare il problema dei \emph{byte nulli}. (a) Perché l'indirizzo di \lstinline|winner()| a 8 byte spezza \lstinline|strcpy|? (b) Le slide originali inseriscono uno shellcode ``push ADDR; ret'' sull'heap: perché sulla vulnbox del corso \emph{non} serve? (c) Quali due accorgimenti pratici usa \lstinline|exploit-x64.py|?
+\begin{solution}
+(a) Su amd64 l'indirizzo di \lstinline|winner()| è $< 2^{32}$, quindi la sua forma a 8 byte termina con byte nulli (\lstinline|\x00|). \lstinline|strcpy| (ed \lstinline|execve|) si fermano al primo byte nullo: troncano il payload prima o dentro l'indirizzo.\\
+(b) Perché su questa toolchain l'\textbf{heap non è eseguibile} anche con \lstinline|-z execstack| (il flag riguarda il segmento stack, non l'intero processo): uno shellcode sull'heap non girerebbe. Ma \lstinline|f->fp()| è una \emph{chiamata a funzione}: basta puntare \lstinline|f->fp| \emph{direttamente} a \lstinline|winner()| in \lstinline|.text| --- nessun codice eseguito sull'heap, quindi nessuna indirezione.\\
+(c) (1) \lstinline|p64(winner)| con i byte nulli \emph{rimossi} (\lstinline|.replace(b'\x00', b'')|): il resto dell'indirizzo coincide con memoria heap già a zero, e \lstinline|strcpy| aggiunge comunque il terminatore. (2) Poiché pwntools rifiuta \lstinline|NUL| in \lstinline|argv|, si lancia il processo con \lstinline|subprocess| diretto invece di \lstinline|process()|.
+\end{solution}

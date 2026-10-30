@@ -1,0 +1,7 @@
+\question[6]
+\lstinline|printf| è una funzione \emph{variadica}: non sa quanti argomenti riceve. (a) Come decide quanti e quali argomenti prelevare? (b) Cosa accade se gli specificatori sono più degli argomenti forniti? (c) Secondo l'ABI, da dove preleva i primi argomenti variadici su i386, su amd64 (System V) e su arm64 (AAPCS64)?
+\begin{solution}
+(a) Lo deduce dalla \textbf{stringa di formato}: ogni specificatore di conversione la istruisce a prelevare un ulteriore argomento, nell'ordine.\\
+(b) Preleva comunque ciò che si trova nelle posizioni successive (parole dello stack o registri): indirizzi di ritorno, variabili, puntatori. Sono questi valori che gli specificatori stampano (\lstinline|%x|/\lstinline|%p|) o dereferenziano (\lstinline|%s|).\\
+(c) \textbf{i386}: tutti gli argomenti sullo stack, sopra la format string. \textbf{amd64}: primi argomenti variadici nei registri \lstinline|RSI, RDX, RCX, R8, R9|, poi stack. \textbf{arm64}: primi argomenti nei registri \lstinline|X1|--\lstinline|X7|, poi stack. Quindi su i386 i \lstinline|%x| leggono subito lo stack; a 64 bit prima i registri, poi lo stack.
+\end{solution}

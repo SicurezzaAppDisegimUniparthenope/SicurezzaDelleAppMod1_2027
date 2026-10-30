@@ -1,0 +1,7 @@
+\question[6]
+Cosa succede davvero quando si chiama \lstinline|free(ptr)|? (a) Elenca le operazioni principali dell'allocatore. (b) Che differenza c'è tra \emph{fast bin}/\emph{tcache} e \emph{small}/\emph{large}/\emph{unsorted bin}? (c) Perché \lstinline|free()| apre la porta a use-after-free e double-free?
+\begin{solution}
+(a) L'allocatore: scrive nell'area ``dati utente'' due puntatori \lstinline|fd| (forward) e \lstinline|bk| (backward); inserisce il chunk in una lista di chunk liberi (un \emph{bin}); azzera il bit \lstinline|PREV_INUSE| del chunk successivo; eventualmente consolida chunk adiacenti liberi in uno più grande. \emph{Nulla azzera il puntatore del chiamante.}\\
+(b) \textbf{fast bin / tcache}: liste per chunk piccoli, riuso rapido \textbf{LIFO}, \emph{senza} consolidamento (il fast bin è una lista \emph{semplice}, solo \lstinline|fd|; tcache è la cache per-thread delle glibc moderne). \textbf{small/large/unsorted}: liste a \emph{doppio} collegamento (\lstinline|fd|/\lstinline|bk|), con consolidamento dei vicini liberi --- ed è qui che agisce \lstinline|unlink()|.\\
+(c) Perché \lstinline|free()| non azzera il puntatore del chiamante: continuare a usarlo è \emph{use-after-free}; liberarlo due volte è \emph{double-free}, che corrompe le liste. La difesa più semplice: \emph{free-and-null} (azzerare il puntatore subito dopo \lstinline|free()|).
+\end{solution}

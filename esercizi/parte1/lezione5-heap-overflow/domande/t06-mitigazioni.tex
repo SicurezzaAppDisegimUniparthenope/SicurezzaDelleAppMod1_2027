@@ -1,0 +1,7 @@
+\question[6]
+Elenca le mitigazioni moderne contro gli attacchi heap, distinguendo quelle \textbf{dell'allocatore} dalle difese \textbf{generali del sistema/compilatore}. In particolare, spiega perché su Debian bookworm (glibc 2.36) l'attacco a \lstinline|unlink()| delle slide non funziona.
+\begin{solution}
+\textbf{Allocatore} --- \emph{safe unlinking}: prima di scollegare verifica \lstinline|P->fd->bk == P| e \lstinline|P->bk->fd == P|; se la lista è incoerente $\to$ \lstinline|abort()|. \emph{tcache key}: rileva il double-free dello stesso chunk. \emph{safe-linking}: i puntatori \lstinline|fd| di fastbin/tcache sono offuscati (glibc $\ge$ 2.32). Controlli su \lstinline|size| e allineamento in \lstinline|malloc()|/\lstinline|free()|.\\
+\textbf{Sistema / compilatore} --- \lstinline|FORTIFY_SOURCE| (bound check su \lstinline|strcpy|/\lstinline|memcpy|), \textbf{NX} (heap e stack non eseguibili), \textbf{ASLR} (layout imprevedibile), più la fonte del problema: \emph{bound check} e API con dimensione esplicita. Analisi statica/dinamica (ASan, Valgrind).\\
+\textbf{Perché glibc 2.36 blocca unlink}: dlmalloc 2.7.2 (2003) non aveva controlli di integrità sulla lista; il \emph{safe unlinking} introdotto dopo le CVE storiche verifica la coerenza di \lstinline|fd|/\lstinline|bk| e fa \lstinline|abort| se sono falsificati. Per questo l'esempio 19 va linkato alla vecchia \lstinline|malloc|.
+\end{solution}

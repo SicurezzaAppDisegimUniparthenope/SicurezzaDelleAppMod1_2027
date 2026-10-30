@@ -1,0 +1,7 @@
+\question[6]
+Il payload di scrittura ha la forma \lstinline|[indirizzo][padding]%N$n|. (a) Spiega il ruolo di ciascuna delle tre parti. (b) Perché, una volta arrivati al \lstinline|%n|, il valore scritto coincide con il contenuto desiderato? (c) Come si ottiene un valore scritto \emph{preciso}?
+\begin{solution}
+(a) \textbf{[indirizzo]}: l'indirizzo bersaglio (es.\ \lstinline|&flag|), 4 byte little-endian, in testa all'input, così finisce nella posizione \lstinline|N| trovata col marcatore. \textbf{[padding]} (tipicamente \lstinline|%x| con larghezza): regola quanti caratteri vengono stampati. \textbf{[\%N\$n]}: scrive alla posizione \lstinline|N|, cioè all'indirizzo messo in testa.\\
+(b) \lstinline|printf| stampa l'indirizzo in testa + il padding: un certo numero di caratteri. Arrivato a \lstinline|%N$n|, scrive \emph{quel numero} all'indirizzo che si trova nella posizione \lstinline|N| --- che è l'indirizzo bersaglio. Quindi: valore scritto $=$ caratteri emessi finora.\\
+(c) Si regola la \emph{larghezza} per emettere esattamente il numero di caratteri voluto (es.\ \lstinline|%100x| $\to$ scrive 100), calcolando il padding necessario. Per valori grandi si scrive a pezzi con \lstinline|%hn|/\lstinline|%hhn|; in pratica \lstinline|fmtstr_payload| automatizza il calcolo.
+\end{solution}

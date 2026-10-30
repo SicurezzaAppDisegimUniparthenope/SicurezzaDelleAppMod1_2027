@@ -1,0 +1,7 @@
+\question[6]
+Descrivi l'anatomia di un \emph{chunk} dell'heap. (a) Quali metadati precedono i dati utente e a cosa servono? (b) Cosa contengono i 3 bit più bassi del campo \lstinline|size| e perché sono disponibili? (c) Cosa indicano \lstinline|PREV_INUSE| e \lstinline|IS_MMAPPED|?
+\begin{solution}
+(a) Ogni blocco allocato è un \emph{chunk}: \lstinline|malloc()| restituisce un puntatore all'area ``dati utente'', preceduta dai metadati \lstinline|prev_size| e \lstinline|size| (dimensione del chunk). È la contiguità fra metadati e dati utente che l'overflow sfrutta.\\
+(b) Il chunk è allineato a 8 byte, quindi i 3 bit più bassi di \lstinline|size| sono sempre liberi e vengono riusati come \textbf{flag di stato}.\\
+(c) \lstinline|PREV_INUSE| (bit 0, ``P''): indica se il chunk \emph{precedente} è in uso; è il flag chiave --- quando un chunk viene liberato, l'allocatore aggiorna \lstinline|P| nel chunk successivo, e l'attacco a \lstinline|unlink()| inganna proprio questo bit per far credere libero un chunk che non lo è. \lstinline|IS_MMAPPED| (bit 1): indica se il chunk è stato ottenuto con \lstinline|mmap()|.
+\end{solution}

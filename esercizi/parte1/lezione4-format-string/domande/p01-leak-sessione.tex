@@ -1,0 +1,8 @@
+\question[7]
+In \lstinline|leak.c| (es.\ 01) il programma legge l'input con \lstinline|read(0, buf, sizeof(buf)-1)| in \lstinline|char buf[256]| e poi esegue \lstinline|printf(buf)|. Rispondi alla sessione dimostrativa:
+(a) perché una sequenza \lstinline|%s%s%s%s| fa (quasi sempre) crashare? (b) cosa stampa \lstinline|%x.%x.%x|? (c) a cosa serve \lstinline|%7$x| rispetto a ripetere otto \lstinline|%x|?
+\begin{solution}
+(a) \lstinline|%s| dice a \lstinline|printf| ``all'indirizzo fornito c'è una stringa, stampala''. Senza argomenti passati, quell'indirizzo è un valore qualsiasi preso dallo stack: se non è un indirizzo valido/leggibile $\to$ \lstinline|SIGSEGV| (segmentation fault). Una sequenza di \lstinline|%s| quasi sempre incontra un valore non valido.\\
+(b) Stampa tre parole prese dallo stack (su i386, parole da 4 byte), separate dai punti: valori interni del processo (puntatori, variabili, resti di frame) che cambiano a ogni esecuzione.\\
+(c) \lstinline|%7$x| salta \emph{direttamente} alla 7\textsuperscript{a} posizione (accesso diretto POSIX) senza dover emettere \lstinline|%x| sette volte per arrivarci: serve a raggiungere/rubare un valore in una posizione precisa. In \lstinline|leak.c| non c'è un segreto da rubare: la sessione mostra la \emph{tecnica} (crash $\to$ dump $\to$ accesso diretto).
+\end{solution}

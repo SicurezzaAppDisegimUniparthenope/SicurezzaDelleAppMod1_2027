@@ -1,0 +1,16 @@
+\question[5]
+Il fenomeno delle format string è identico su tutte le architetture; cambia solo \emph{da dove} \lstinline|printf| preleva i primi argomenti e la dimensione della parola. Completa la tabella per i386, amd64 e arm64 (specificatore tipico per il leak, dimensione dell'indirizzo per la scrittura) e di' perché lo stesso \lstinline|exploit.py| funziona su tutte.
+\begin{solution}
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+Arch & Primi argomenti variadici & Leak & Indirizzo (scrittura)\\
+\midrule
+i386  & tutti sullo stack          & \lstinline|%x|  (4 byte) & 4 byte\\
+amd64 & \lstinline|RSI,RDX,RCX,R8,R9| poi stack & \lstinline|%lx| (8 byte) & 8 byte\\
+arm64 & \lstinline|X1|--\lstinline|X7| poi stack & \lstinline|%lx| (8 byte) & 8 byte\\
+\bottomrule
+\end{tabular}
+\end{center}
+Per la lettura cambia l'ampiezza della parola (\lstinline|%x| vs \lstinline|%lx|) e l'origine dei primi valori (registri prima dello stack a 64 bit). Per la scrittura, \lstinline|fmtstr_payload| di pwntools è \emph{arch-aware}: dato l'indirizzo bersaglio (4 o 8 byte) e l'offset, genera il payload \lstinline|%n|/\lstinline|%hn| corretto per l'ABI. Quindi lo stesso script funziona ovunque: basta cambiare il binario e l'offset. (A 64 bit l'indirizzo a 8 byte contiene spesso byte nulli, gestiti automaticamente dalla scrittura ``a pezzi''.)
+\end{solution}

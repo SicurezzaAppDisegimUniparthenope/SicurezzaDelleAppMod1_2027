@@ -1,0 +1,11 @@
+\question[5]
+Spiega il \emph{metodo del marcatore} per trovare l'offset del proprio input tra gli argomenti di \lstinline|printf|. Scrivi i comandi e di' come si riconosce la posizione giusta. Perché è un passo indispensabile prima di sfruttare \lstinline|%n|?
+\begin{solution}
+Si inserisce in testa all'input un marcatore noto (4 byte stampabili, es.\ \lstinline|AAAA| $=$ \lstinline|0x41414141|) seguito da un accesso diretto crescente, e si aumenta \lstinline|N| finché nell'output non si rivede il marcatore:
+\begin{lstlisting}[style=sh]
+echo -n 'AAAA.%1$x' | ./leak
+echo -n 'AAAA.%7$x' | ./leak   # -> AAAA.41414141 : offset = 7
+\end{lstlisting}
+Quando \lstinline|%N$x| ristampa \lstinline|41414141|, \lstinline|N| è la posizione in cui finisce il nostro input (qui 7). Con pwntools lo stesso si fa con \lstinline|b'%p.'*n| cercando \lstinline|0x41414141|.
+È indispensabile perché per scrivere con \lstinline|%n| l'indirizzo bersaglio va messo proprio in quella posizione: senza conoscere l'offset non si sa su quale argomento agisce il \lstinline|%n|.
+\end{solution}

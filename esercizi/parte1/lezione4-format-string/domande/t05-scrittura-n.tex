@@ -1,0 +1,7 @@
+\question[6]
+Lo specificatore \lstinline|%n| è il cuore della scrittura in memoria. (a) Cosa scrive esattamente, e dove? (b) Come si controlla il \emph{valore} scritto? (c) Perché per scrivere valori grandi si usano \lstinline|%hn| e \lstinline|%hhn|?
+\begin{solution}
+(a) \lstinline|%n| scrive il \textbf{numero di caratteri stampati finora} all'indirizzo passato come argomento corrispondente. Se l'argomento non è stato fornito, \lstinline|printf| usa come destinazione un valore preso dalla posizione corrispondente (stack/registri), che l'attaccante può controllare.\\
+(b) Controllando \emph{quanti caratteri} si fanno stampare prima del \lstinline|%n|: con la larghezza (es.\ \lstinline|%100x| emette 100 caratteri $\to$ \lstinline|%n| scrive 100) o con padding calcolato per ottenere il valore preciso.\\
+(c) Un \lstinline|int| occupa 4 byte: scrivere un valore grande richiederebbe emettere moltissimi caratteri. \lstinline|%hn| scrive 2 byte (short), \lstinline|%hhn| 1 byte (char): si scrive il valore ``a pezzi'', 2 o 1 byte alla volta a indirizzi consecutivi. \lstinline|fmtstr_payload| di pwntools sceglie automaticamente la strategia a byte.
+\end{solution}

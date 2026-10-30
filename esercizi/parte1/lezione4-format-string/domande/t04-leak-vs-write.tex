@@ -1,0 +1,7 @@
+\question[5]
+Una format string controllata dall'utente offre \textbf{due primitive}. Descrivile entrambe, indicando per ciascuna gli specificatori usati e cosa serve all'attaccante per sfruttarla.
+\begin{solution}
+\textbf{Lettura (information leak)} --- specificatori \lstinline|%x|, \lstinline|%p| (dump di stack/registri), \lstinline|%s| (lettura della stringa a un indirizzo scelto), \lstinline|%n$| per l'accesso diretto a una posizione. Serve conoscere l'\emph{offset} della posizione da leggere.\\
+\textbf{Scrittura (data corruption)} --- specificatore \lstinline|%n| (e le varianti \lstinline|%hn|/\lstinline|%hhn| per scrivere 2 o 1 byte alla volta, utili per valori grandi). Serve l'\emph{offset} del proprio input \emph{più} l'\emph{indirizzo bersaglio} da far finire in quella posizione.\\
+Stessa radice (\lstinline|printf(buf)|), due effetti complementari: leggere la memoria del processo e scrivervi a piacimento.
+\end{solution}

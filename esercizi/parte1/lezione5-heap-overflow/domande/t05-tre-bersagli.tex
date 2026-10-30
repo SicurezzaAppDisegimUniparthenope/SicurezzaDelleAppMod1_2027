@@ -1,0 +1,11 @@
+\question[5]
+Un overflow sull'heap può colpire tre bersagli diversi, in ordine di profondità crescente. Indicali, associa a ciascuno l'esempio della vulnbox e la primitiva ottenuta.
+\begin{solution}
+Un'unica radice (scrivere oltre i limiti di un buffer allocato sull'heap), tre bersagli:
+\begin{enumerate}[leftmargin=*,nosep]
+  \item \textbf{Un puntatore a funzione} nel chunk vicino $\to$ dirotta subito il flusso di esecuzione. Esempio \textbf{16 heap-zero}, primitiva: \emph{overwrite diretto} del puntatore a funzione.
+  \item \textbf{Un puntatore stantio} riusato dopo \lstinline|free()| $\to$ \emph{use-after-free}. Esempio \textbf{18 heap-two}.
+  \item \textbf{I metadati dell'allocatore} (\lstinline|size|, \lstinline|fd|/\lstinline|bk|) $\to$ \lstinline|unlink()| / \emph{write-what-where}. Esempio \textbf{19 heap-three}.
+\end{enumerate}
+È una scala di complessità crescente: dal dato, al puntatore, fino alla struttura interna dell'allocatore.
+\end{solution}

@@ -1,0 +1,7 @@
+\question[6]
+Elenca le mitigazioni delle format-string vulnerabilities distinguendo tra \textbf{sviluppatore} (codice/compilatore) e \textbf{sistema/build}. Spiega perché le difese di sistema da sole non eliminano il bug.
+\begin{solution}
+\textbf{Sviluppatore} --- La correzione fondamentale: la format string deve essere \emph{sempre} una stringa letterale; per stampare dati dell'utente passarli come argomento (\lstinline|printf("%s", dato)|). In compilazione: \lstinline|-Wformat|, \lstinline|-Wformat-security| (avvisa se il formato non è letterale), \lstinline|-Werror=format-security| (lo trasforma in errore). Evitare \lstinline|%n| in codice nuovo (deprecato/disabilitato su Windows CRT e varie libc).\\
+\textbf{Sistema / build} --- \lstinline|FORTIFY_SOURCE| (\lstinline|-D_FORTIFY_SOURCE=2|): \lstinline|abort| se un formato con \lstinline|%n| si trova in memoria scrivibile. \textbf{RELRO} (GOT in sola lettura), \textbf{ASLR} (serve un leak preliminare), \textbf{stack canary}.\\
+\textbf{Perché non bastano}: RELRO, ASLR e canary riducono l'\emph{impatto} (rendono i bersagli più difficili da raggiungere), ma non eliminano la \emph{causa} --- la riga \lstinline|printf(buf)| con input non fidato. Solo la correzione del codice chiude il bug.
+\end{solution}

@@ -1,0 +1,9 @@
+\question[7]
+In \lstinline|heap-zero.c| (es.\ 16) ci sono \lstinline|struct data { char name[64]; }| e \lstinline|struct fp { void (*fp)(); ... }|, allocate con due \lstinline|malloc| consecutivi (\lstinline|d|, poi \lstinline|f| con \lstinline|f->fp = nowinner|); segue \lstinline|strcpy(d->name, argv[1])| e infine \lstinline|f->fp()|.
+(a) Perché un \lstinline|argv[1]| lungo può raggiungere \lstinline|f->fp|? (b) Come ricavi l'offset e l'indirizzo di \lstinline|winner()|? (c) Scrivi il payload. (d) Perché l'exploit resta valido anche con l'ASLR attivo?
+\begin{solution}
+(a) \lstinline|d| e \lstinline|f| sono chunk \emph{adiacenti} sull'heap. \lstinline|strcpy| non controlla i limiti: un argomento più lungo di \lstinline|name[64]| trabocca dal buffer nel chunk di \lstinline|f| e sovrascrive \lstinline|f->fp| (primo campo). Subito dopo \lstinline|f->fp()| salta dove diciamo noi. Obiettivo: far chiamare \lstinline|winner()| al posto di \lstinline|nowinner()|.\\
+(b) \textbf{Offset}: il programma stampa gli indirizzi (\lstinline|data is at %p, fp is at %p|); un lancio ``probe'' dà \lstinline|offset = f - d| (nell'esempio i386 $0x200-0x1b0 = 0x50 = 80$ byte). \textbf{\texttt{winner()}}: \lstinline!nm heap-zero | grep winner! (o \lstinline|ELF().symbols['winner']|), fisso perché \lstinline|-no-pie| (es.\ \lstinline|0x080491a6|).\\
+(c) \lstinline|payload = b'A'*offset + p32(winner_addr)| (passato come \lstinline|argv[1]|).\\
+(d) Perché l'\lstinline|offset| è una \emph{dimensione di chunk} (distanza \lstinline|d|$\to$\lstinline|f|), non un indirizzo assoluto, e resta costante anche se l'heap viene rilocato; \lstinline|winner()| è a indirizzo \emph{fisso} (\lstinline|-no-pie|). L'ASLR sposta l'heap ma non cambia né la distanza né \lstinline|winner|.
+\end{solution}

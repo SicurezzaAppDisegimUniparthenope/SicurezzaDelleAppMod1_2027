@@ -1,0 +1,16 @@
+\question[5]
+Completa la tabella di confronto dei tre esempi di laboratorio (16, 18, 19): bersaglio, primitiva, difesa chiave e varianti d'architettura supportate sulla vulnbox.
+\begin{solution}
+\begin{center}\small
+\begin{tabular}{@{}lllll@{}}
+\toprule
+Esempio & Bersaglio & Primitiva & Difesa chiave & Varianti\\
+\midrule
+16 heap-zero  & puntatore a funzione & overwrite diretto      & NX, bound check   & i386 / x64 / arm64\\
+18 heap-two   & puntatore stantio    & use-after-free         & free-and-null     & i386 / x64 / arm64\\
+19 heap-three & metadati allocatore  & \lstinline|unlink| / write-what-where & safe unlinking & solo i386\\
+\bottomrule
+\end{tabular}
+\end{center}
+Dal dato, al puntatore, ai metadati dell'allocatore: ogni livello colpisce una struttura più profonda ed è una scala di complessità crescente. \lstinline|heap-three| è l'attacco che ha costretto gli allocatori a introdurre i controlli di integrità (safe unlinking): per questo gira solo sulla vecchia dlmalloc 2.7.2 e solo su i386.
+\end{solution}

@@ -1,0 +1,7 @@
+\question[5]
+Che cos'è una \emph{format string} e perché \lstinline|printf(buf)|, con \lstinline|buf| controllato dall'utente, è una vulnerabilità? Indica la differenza con \lstinline|printf("%s", buf)| e il codice CWE associato.
+\begin{solution}
+La format string è il primo argomento di \lstinline|printf| (e affini): un modello di testo in cui gli specificatori di conversione (\lstinline|%d|, \lstinline|%s|, \lstinline|%x|, \dots) indicano quali e quanti argomenti prelevare.
+In \lstinline|printf(buf)| il buffer dell'utente \emph{è} la format string: se contiene specificatori, \lstinline|printf| li interpreta e preleva argomenti che non sono stati passati, leggendo/scrivendo memoria del processo. In \lstinline|printf("%s", buf)| il formato è una costante e \lstinline|buf| è solo un \emph{dato} stampato come stringa: nessuno specificatore viene interpretato (comportamento sicuro).
+Classificazione: \textbf{CWE-134} --- \emph{Use of Externally-Controlled Format String}.
+\end{solution}

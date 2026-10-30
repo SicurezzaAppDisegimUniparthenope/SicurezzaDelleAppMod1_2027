@@ -1,0 +1,6 @@
+\question[6]
+Confronta un overflow sullo \textbf{stack} con uno sull'\textbf{heap}. (a) Quali bersagli colpisce tipicamente ciascuno? (b) Perché gli attacchi heap-based sono considerati più difficili?
+\begin{solution}
+(a) Sullo \textbf{stack} si colpisce tipicamente il \emph{return address} salvato (e variabili locali, saved EBP). Sull'\textbf{heap} non c'è un return address vicino: si colpiscono i \emph{dati}, i \emph{puntatori} o i \emph{metadati dell'allocatore} del chunk adiacente.\\
+(b) Perché dipendono molto di più dall'ambiente: la struttura dell'heap dipende da architettura e allocatore (glibc ptmalloc2, dlmalloc, musl\dots); servono più informazioni (dove sono i chunk, come sono allineati e collegati); l'heap può essere frammentato e le aree non contigue; con l'ASLR gli indirizzi cambiano a ogni esecuzione (niente offset fissi come sullo stack). La radice però è la stessa: input non controllato, copie senza limiti (\lstinline|strcpy|).
+\end{solution}

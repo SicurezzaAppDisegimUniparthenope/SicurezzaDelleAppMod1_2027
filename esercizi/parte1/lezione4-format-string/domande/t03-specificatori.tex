@@ -1,0 +1,18 @@
+\question[6]
+Per ciascuno degli specificatori \lstinline|%x|, \lstinline|%p|, \lstinline|%s|, \lstinline|%n| indica cosa fa e la rispettiva nota di sicurezza. Spiega inoltre a cosa servono la \emph{larghezza} (\lstinline|%Nx|) e l'\emph{accesso diretto} (\lstinline|%n$|).
+\begin{solution}
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Specificatore & Cosa fa & Nota di sicurezza\\
+\midrule
+\lstinline|%x| & stampa una parola in esadecimale & dump dello stack/registri\\
+\lstinline|%p| & stampa un puntatore (indirizzo)   & rivela indirizzi $\to$ leak\\
+\lstinline|%s| & stampa la stringa all'indirizzo fornito & dereferenzia $\to$ crash o leak\\
+\lstinline|%n| & \emph{scrive} quanti caratteri stampati finora & primitiva di \textbf{scrittura}\\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{Larghezza} \lstinline|%Nx|: forza l'emissione di almeno \lstinline|N| caratteri; il conteggio dei caratteri emessi è esattamente ciò che poi \lstinline|%n| scrive in memoria.\\
+\textbf{Accesso diretto} \lstinline|%n$| (indicizzazione POSIX): \lstinline|%7$x| legge direttamente il 7\textsuperscript{o} argomento senza ripetere sette \lstinline|%x|. Si combina con la larghezza (es.\ \lstinline|%10$n|) per leggere/scrivere una posizione precisa.
+\end{solution}
