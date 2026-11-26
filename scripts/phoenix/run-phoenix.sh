@@ -187,8 +187,17 @@ if [[ "$NATIVE" -eq 1 ]]; then
     ACCEL_ARGS=(-accel hvf)
     CPU_ARGS=(-cpu host)
   elif [[ "$OS" == "Linux" && -e /dev/kvm ]]; then
-    ACCEL_ARGS=(-accel kvm)
-    CPU_ARGS=(-cpu host)
+    # /dev/kvm puo' esistere ma non essere accessibile (utente non nel gruppo
+    # 'kvm'): in quel caso NON tentiamo -accel kvm, altrimenti QEMU esce subito
+    # con "Could not access KVM kernel module: Permission denied". Usiamo TCG.
+    if [[ -r /dev/kvm && -w /dev/kvm ]]; then
+      ACCEL_ARGS=(-accel kvm)
+      CPU_ARGS=(-cpu host)
+    else
+      echo "==> /dev/kvm presente ma non accessibile dall'utente '$(id -un)': uso l'emulazione software (TCG, piu' lenta)." >&2
+      echo "    Per abilitare l'accelerazione KVM (molto piu' veloce), aggiungi l'utente al gruppo kvm:" >&2
+      echo "      sudo usermod -aG kvm $(id -un)   # poi effettua logout/login (o 'newgrp kvm')" >&2
+    fi
   fi
 elif [[ "$ARCH" == "arm64" ]]; then
   CPU_ARGS=(-cpu cortex-a57)
@@ -196,6 +205,27 @@ fi
 
 MACHINE_ARGS=()
 [[ "$ARCH" == "arm64" ]] && MACHINE_ARGS=(-M virt)
+
+# QEMU usa SLIRP per il forwarding SSH (hostfwd su 127.0.0.1:$SSH_PORT). Se la
+# porta e' gia' occupata (tipicamente un QEMU rimasto appeso da un avvio
+# precedente) il forwarding fallisce con "Could not set up host forwarding
+# rule" e la VM non parte. Lo intercettiamo qui con un messaggio chiaro.
+port_in_use() {
+  if command -v ss >/dev/null 2>&1; then
+    ss -ltn 2>/dev/null | grep -qE "[:.]${SSH_PORT}[[:space:]]"
+  elif command -v lsof >/dev/null 2>&1; then
+    lsof -nP -iTCP:"$SSH_PORT" -sTCP:LISTEN >/dev/null 2>&1
+  else
+    return 1  # nessuno strumento per controllare: lasciamo decidere a QEMU
+  fi
+}
+if port_in_use; then
+  echo "==> La porta $SSH_PORT e' gia' in uso: QEMU non potra' impostare il forwarding SSH." >&2
+  echo "    Possibili cause/soluzioni:" >&2
+  echo "      - un QEMU precedente e' rimasto appeso:  pkill -f qemu-system-x86_64" >&2
+  echo "      - oppure usa un'altra porta:             $0 --port 2223" >&2
+  exit 1
+fi
 
 echo "==> Avvio Phoenix in modalita' $( [[ $HEADLESS -eq 1 ]] && echo headless || echo GUI )"
 echo "==> Una volta avviata: ssh -p $SSH_PORT user@127.0.0.1   (password: user)"
@@ -222,10 +252,16 @@ set -e
 
 if [[ $STATUS -ne 0 && ${#ACCEL_ARGS[@]} -gt 0 ]]; then
   echo "==> QEMU si e' interrotto subito dopo l'avvio con l'accelerazione hardware attiva." >&2
-  echo "    Su alcune versioni recenti/beta di macOS l'Hypervisor.framework rifiuta il" >&2
-  echo "    binario QEMU installato da Homebrew (entitlement non riconosciuto)." >&2
-  echo "    Fix permanente: vedi la sezione 'Problemi comuni' nel README (ri-firma di" >&2
-  echo "    qemu con l'entitlement com.apple.security.hypervisor)." >&2
+  if [[ "$OS" == "Darwin" ]]; then
+    echo "    Su alcune versioni recenti/beta di macOS l'Hypervisor.framework rifiuta il" >&2
+    echo "    binario QEMU installato da Homebrew (entitlement non riconosciuto)." >&2
+    echo "    Fix permanente: vedi la sezione 'Problemi comuni' nel README (ri-firma di" >&2
+    echo "    qemu con l'entitlement com.apple.security.hypervisor)." >&2
+  else
+    echo "    Su Linux di solito significa che l'utente non ha accesso a /dev/kvm" >&2
+    echo "    (non e' nel gruppo 'kvm') oppure KVM non e' disponibile su questo host." >&2
+    echo "    Fix: sudo usermod -aG kvm $(id -un)   # poi logout/login (o 'newgrp kvm')" >&2
+  fi
   echo "==> Riprovo senza accelerazione hardware (emulazione via TCG, piu' lenta)..." >&2
   FALLBACK_CPU_ARGS=()
   [[ "$ARCH" == "arm64" ]] && FALLBACK_CPU_ARGS=(-cpu cortex-a57)
