@@ -21,7 +21,7 @@ sullo **stack**.
 > layout di memoria (ASLR spento, heap e stack con indirizzi noti) che la
 > vulnbox moderna non ha e Phoenix sì.
 
-## Perché NON sulla vulnbox (verificato)
+## Perché NON sulla vulnbox
 
 - La corruzione **avviene** anche sulla vulnbox: un `argv[1]`/`argv[2]`
   sufficientemente lungo (oltre gli 8 byte di `name`) sovrascrive la
