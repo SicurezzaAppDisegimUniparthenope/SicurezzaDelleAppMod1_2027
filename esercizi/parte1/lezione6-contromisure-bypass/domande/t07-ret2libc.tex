@@ -1,0 +1,7 @@
+\question[6]
+Il \textbf{return-to-libc}. (a) Qual è l'idea e l'obiettivo tipico? (b) Elenca i passi e spiega perché NX non lo ferma. (c) Che cosa cambia passando da 32 a 64 bit?
+\begin{solution}
+(a) Usare un buffer overflow per sostituire il return address con l'indirizzo di un'\emph{altra} funzione già in memoria --- quasi sempre \lstinline|system()| della libc. Obiettivo tipico: eseguire \lstinline|system("/bin/sh")| con i privilegi del programma. (Tecnica di Solar Designer, 1997.)\\
+(b) Passi: (1) trovare l'indirizzo di \lstinline|system()| in libc; (2) trovare l'indirizzo della stringa \lstinline|"/bin/sh"| (presente in libc); (3) corrompere lo stack perché al \lstinline|ret| si entri in \lstinline|system()| con \lstinline|"/bin/sh"| come argomento. Schema a 32 bit (cdecl, argomenti sullo stack): \lstinline|padding| + \lstinline|&system| + \lstinline|&exit| (il ``return address'' di \lstinline|system|, per uscire pulito) + \lstinline|&"/bin/sh"|. Non serve uno stack eseguibile: \lstinline|system()| è \emph{già} codice eseguibile $\to$ NX non ferma nulla.\\
+(c) Nell'ABI System V AMD64 il primo argomento va in \textbf{RDI}, non sullo stack $\to$ serve un gadget \lstinline|pop rdi; ret|; inoltre \lstinline|system()| moderno pretende lo stack allineato a 16 byte $\to$ a volte serve un \lstinline|ret| di allineamento. Il principio resta identico. Gli indirizzi di libc dipendono dall'ASLR $\to$ si \emph{leggono} dal processo (\lstinline|/proc/<pid>/maps|), non si scrivono a mano.
+\end{solution}

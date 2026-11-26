@@ -1,0 +1,8 @@
+\question[7]
+Lab ROP (es.\ 04). Il binario (\lstinline|-no-pie|, non stripped) ha un buffer globale \lstinline|char command[32]| e tre funzioni ``gadget'': \lstinline|add_bin| (scrive 4 byte in \lstinline|command|), \lstinline|add_sh| (scrive 8 byte in \lstinline|command+4|), \lstinline|exec_string| (\lstinline|system(command)|); l'overflow è in \lstinline|vulnerable(){ char buffer[64]; read(0,buffer,300); }|.
+(a) Qual è lo scopo della catena \lstinline|add_bin| $\to$ \lstinline|add_sh| $\to$ \lstinline|exec_string|? (b) Come si costruisce il payload e da dove vengono gli indirizzi? (c) Che ruolo hanno i gadget \lstinline|pop/ret| inseriti da pwntools?
+\begin{solution}
+(a) Comporre a pezzi la stringa \lstinline|"/bin/sh"| dentro \lstinline|command| e poi eseguirla: \lstinline|add_bin| scrive \lstinline|"/bin"| in \lstinline|command[0..3]|, \lstinline|add_sh| scrive \lstinline|"/sh\0"| in \lstinline|command[4..7]|, \lstinline|exec_string| chiama \lstinline|system(command)| $\to$ shell. Le tre funzioni fanno da ``gadget'' incatenati come return address successivi.\\
+(b) \lstinline|payload = cyclic(offset) + rop.chain()| (nelle slide \lstinline|offset 76|; ricavato con \lstinline|cyclic()| + corefile). Gli indirizzi delle tre funzioni vengono dai \textbf{simboli del binario} (\lstinline|-no-pie|, non stripped) $\to$ fissi, nessun hardcode manuale.\\
+(c) Dopo ogni ``chiamata'' via \lstinline|ret|, gli argomenti restano sullo stack: pwntools inserisce gadget \lstinline|pop; ret| per \emph{scavalcarli} (convenzione cdecl) e far avanzare \lstinline|ESP| al gadget successivo della catena, mantenendola allineata.
+\end{solution}

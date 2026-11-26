@@ -1,0 +1,8 @@
+\question[7]
+Lab return-to-libc (es.\ 03). \lstinline|void vulnerable(){ char buffer[64]; read(0,buffer,300); ... }|; obiettivo: ottenere \lstinline|system("/bin/sh")| \emph{senza} stack eseguibile.
+(a) Qual è la struttura del payload a 32 bit e il ruolo di ciascun elemento? (b) Come si ottengono offset e indirizzi senza hardcodarli? (c) Perché NX non impedisce questo attacco?
+\begin{solution}
+(a) \lstinline|payload = padding + &system + &exit + &"/bin/sh"| (nelle slide: \lstinline|padding(80)|). Il \lstinline|padding| riempie fino al return address; \lstinline|&system| è il nuovo ``return address'' (al \lstinline|ret| si entra in \lstinline|system|); \lstinline|&exit| è il return address \emph{di} \lstinline|system| (per uscire pulito al termine della shell); \lstinline|&"/bin/sh"| è l'argomento di \lstinline|system| (cdecl: argomenti sullo stack).\\
+(b) L'\textbf{offset} fino a EIP si trova con \lstinline|cyclic()| + corefile (\lstinline|cyclic_find(core.eip)|) in un run ``usa e getta''. Gli \textbf{indirizzi} di \lstinline|system|/\lstinline|exit|/\lstinline|"/bin/sh"| si leggono dalla libc \emph{effettivamente mappata} a runtime (dipendono dall'ASLR), non si scrivono a mano.\\
+(c) Perché non si esegue codice sullo stack: \lstinline|system()| è \emph{già} codice eseguibile in libc. NX protegge dall'iniezione, non dal \emph{riuso} di codice $\to$ qui è irrilevante.
+\end{solution}

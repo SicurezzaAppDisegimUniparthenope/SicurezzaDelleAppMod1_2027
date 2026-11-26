@@ -1,0 +1,8 @@
+\question[5]
+Lab ASLR (es.\ 14). Il programma \lstinline|aslr.c| stampa l'indirizzo di una variabile locale: \lstinline|int local_var=42; printf("%p", &local_var);|.
+(a) Che cosa si osserva eseguendolo più volte con ASLR attivo e con \lstinline|run-noaslr|? (b) Perché proprio una variabile locale? (c) Che conseguenza ha tutto ciò per gli exploit ret2libc/ROP del laboratorio?
+\begin{solution}
+(a) Con \textbf{ASLR attivo} l'indirizzo \emph{cambia} a ogni esecuzione; con \lstinline|run-noaslr| (che disattiva l'ASLR del singolo processo, \lstinline|personality(ADDR_NO_RANDOMIZE)|) resta \emph{costante}.\\
+(b) Perché \lstinline|local_var| vive sullo \textbf{stack}, una delle regioni che l'ASLR randomizza (insieme a heap, librerie, mmap, e all'eseguibile se PIE): il suo indirizzo è un indicatore diretto della randomizzazione.\\
+(c) Che gli indirizzi (di stack e libc) \emph{non} si possono scrivere a mano: gli exploit ret2libc/ROP li \textbf{leggono a runtime} dal processo in esecuzione (o dalla libc effettivamente mappata), oppure --- per avere indirizzi riproducibili in aula --- disattivano l'ASLR del processo con \lstinline|run-noaslr|.
+\end{solution}

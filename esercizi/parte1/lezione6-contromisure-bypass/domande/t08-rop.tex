@@ -1,0 +1,8 @@
+\question[7]
+Il \textbf{Return Oriented Programming} (ROP). (a) In che senso generalizza il return-to-libc? (b) Che cos'è un \emph{gadget} e perché è il \lstinline|ret| il ``motore'' della catena? (c) Per un \lstinline|execve("/bin/sh")| via syscall su i386, quali registri vanno preparati e con quali gadget? (d) Come si trovano i gadget?
+\begin{solution}
+(a) Invece di chiamare \emph{una} funzione, si concatenano tanti piccoli frammenti (\textbf{gadget}). Impilando sullo stack una sequenza di indirizzi di gadget, ogni \lstinline|ret| salta al successivo $\to$ si compone un comportamento complesso senza iniettare nulla (ROP è ``Turing-completo'').\\
+(b) Un gadget è un breve blocco di istruzioni (tipicamente 2--5) che \emph{termina con} \lstinline|ret| (o altro trasferimento di controllo); se ne trovano in abbondanza in libc. Il \lstinline|ret| preleva dalla cima dello stack l'indirizzo e ci salta, avanzando lo stack pointer: con lo stack sotto controllo (overflow) ogni \lstinline|ret| consuma un indirizzo ed esegue il gadget corrispondente. È \textbf{ESP} a fare da ``program counter'' della catena.\\
+(c) \lstinline|EAX = 0x0b| (numero di \lstinline|execve|), \lstinline|EBX = &"/bin/sh"|, \lstinline|ECX = EDX = 0|, poi \lstinline|int 0x80|. Gadget: \lstinline|pop eax; ret| --- \lstinline|pop ebx; ret| --- \lstinline|xor ecx,ecx; ret| --- \lstinline|int 0x80|.\\
+(d) A mano ispezionando \lstinline|objdump -d| in cerca di sequenze utili che finiscono con \lstinline|ret| (anche da \emph{disallineamenti} delle istruzioni); oppure con strumenti automatici: Ropper, ROPgadget, la classe \lstinline|ROP| di pwntools (che può anche \emph{costruire} la catena, inserendo i gadget \lstinline|pop/ret| per pulire gli argomenti).
+\end{solution}

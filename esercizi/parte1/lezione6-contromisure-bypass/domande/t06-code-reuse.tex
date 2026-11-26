@@ -1,0 +1,7 @@
+\question[5]
+Esecuzione di codice arbitrario (ACE) e \textbf{riuso di codice}. (a) Quali sono le due grandi famiglie per ottenere ACE e quale è bloccata da NX? (b) Qual è il principio comune del code reuse e perché NX diventa irrilevante? (c) Quali sono le tre varianti, in ordine di complessità?
+\begin{solution}
+(a) \textbf{Code injection}: porta codice \emph{nuovo} (shellcode) e lo esegue $\to$ bloccato da NX. \textbf{Code reuse}: riusa codice \emph{già presente ed eseguibile} (libc, binario) $\to$ aggira NX.\\
+(b) Non si introducono istruzioni nuove: si \emph{dirotta il flusso} verso istruzioni già nel processo e già eseguibili. Lo stack (o un'area dati) non contiene codice, ma \textbf{indirizzi e dati} che pilotano l'esecuzione di codice altrui. NX è irrilevante perché non si esegue nulla nelle pagine scrivibili.\\
+(c) \textbf{return-to-libc} $\to$ \textbf{ROP} (Return Oriented Programming) $\to$ \textbf{JOP} (Jump Oriented Programming).
+\end{solution}

@@ -1,0 +1,8 @@
+\question[7]
+Lab Stack Canary (es.\ 13). Il sorgente ha \lstinline|highSecurityFunction()| (stampa ``TOP SECRET'', mai chiamata) e \lstinline|lowSecurityFunction(){ char buffer[20]; read(0,buffer,300); }|. Si compila \lstinline|vuln-canary-off| (\lstinline|-fno-stack-protector|) e \lstinline|vuln-canary-on| (\lstinline|-fstack-protector-all|) e si lancia lo stesso payload.
+(a) Come si costruisce il payload e come si trova l'offset? (b) Qual è l'esito contro i due binari? (c) Perché il canary intercetta questo attacco ma non ``vede'' una GOT overwrite?
+\begin{solution}
+(a) Si raggiunge \lstinline|highSecurityFunction| \emph{solo} corrompendo il return address: \lstinline|payload = cyclic(offset) + p32(&highSecurityFunction)|. L'offset fino al return address si ricava con un pattern ciclico (\lstinline|cyclic()| / \lstinline|cyclic_find()| su \lstinline|$eip|/corefile), calcolato \emph{sul binario senza canary}; \lstinline|&highSecurityFunction| dai simboli (\lstinline|-no-pie|, non stripped).\\
+(b) \lstinline|vuln-canary-off|: l'overflow raggiunge il return address $\to$ \textbf{TOP SECRET} (\lstinline|highSecurityFunction| eseguita). \lstinline|vuln-canary-on|: per arrivare al return address il payload deve attraversare e sovrascrivere il canary; l'epilogo lo rileva $\to$ \textbf{*** stack smashing detected ***} e abort, \emph{prima} di usare il return address.\\
+(c) Perché il canary sta \emph{tra} le variabili locali e il return address: un overflow lineare che vuole il return address lo attraversa per forza. Una GOT overwrite (o un attacco heap) scrive \emph{altrove}, senza toccare né il canary né il return address $\to$ il controllo non scatta.
+\end{solution}

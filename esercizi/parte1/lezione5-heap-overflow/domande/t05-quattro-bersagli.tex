@@ -1,0 +1,12 @@
+\question[6]
+Un overflow sull'heap può colpire quattro bersagli diversi, in ordine di profondità crescente. Indicali, associa a ciascuno l'esempio e la primitiva ottenuta.
+\begin{solution}
+Un'unica radice (scrivere oltre i limiti di un buffer allocato sull'heap), quattro bersagli:
+\begin{enumerate}[leftmargin=*,nosep]
+  \item \textbf{Un puntatore a funzione} nel chunk vicino $\to$ dirotta \emph{subito} il flusso di esecuzione. Esempio \textbf{16 heap-zero}, primitiva: \emph{overwrite diretto} del puntatore a funzione.
+  \item \textbf{Un puntatore a dati} (es.\ un altro puntatore \lstinline|name|) $\to$ sovrascritto, fa diventare la scrittura successiva una \emph{write-what-where} che raggiunge il \emph{return address} sullo stack. Esempio \textbf{17 heap-one}, primitiva: \emph{overwrite di puntatore} $\to$ return address (controllo indiretto).
+  \item \textbf{Un puntatore stantio} riusato dopo \lstinline|free()| $\to$ \emph{use-after-free}. Esempio \textbf{18 heap-two}.
+  \item \textbf{I metadati dell'allocatore} (\lstinline|size|, \lstinline|fd|/\lstinline|bk|) $\to$ \lstinline|unlink()| / \emph{write-what-where}. Esempio \textbf{19 heap-three}.
+\end{enumerate}
+È una scala di complessità crescente: dal dato, al puntatore (a funzione, poi a dati), fino alla struttura interna dell'allocatore.
+\end{solution}

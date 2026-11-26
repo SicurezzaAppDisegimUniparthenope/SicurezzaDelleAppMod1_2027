@@ -1,0 +1,17 @@
+\question[6]
+Completa la tabella di confronto dei quattro esempi di laboratorio (16, 17, 18, 19): bersaglio, primitiva, difesa chiave e dove è stato sfruttato.
+\begin{solution}
+\begin{center}\small
+\begin{tabular}{@{}lllll@{}}
+\toprule
+Esempio & Bersaglio & Primitiva & Difesa chiave & Stato\\
+\midrule
+16 heap-zero  & puntatore a funzione & overwrite diretto      & NX, bound check   & i386 / x64 / arm64\\
+17 heap-one   & puntatore dati $\to$ stack & overwrite + return addr & ASLR, bound check & su Phoenix (ASLR off)\\
+18 heap-two   & puntatore stantio    & use-after-free         & free-and-null     & i386 / x64 / arm64\\
+19 heap-three & metadati allocatore  & \lstinline|unlink| / write-what-where & safe unlinking & solo i386 (dlmalloc 2.7.2)\\
+\bottomrule
+\end{tabular}
+\end{center}
+Dal dato, al puntatore (a funzione, poi a dati), ai metadati dell'allocatore: ogni livello colpisce una struttura più profonda ed è una scala di complessità crescente. \lstinline|heap-one| è sfruttabile solo dove il \emph{layout} lo consente (Phoenix, ASLR off, heap/stack vicini); \lstinline|heap-three| gira solo sulla vecchia dlmalloc 2.7.2 (i386), l'allocatore privo di \emph{safe unlinking}.
+\end{solution}

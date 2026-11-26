@@ -1,0 +1,7 @@
+\question[6]
+Il \textbf{Jump Oriented Programming} (JOP). (a) Perché è stato introdotto rispetto al ROP? (b) Come funziona (gadget, dispatcher, dispatch table)? (c) Qual è la differenza essenziale con il ROP e una nota sulle architetture.
+\begin{solution}
+(a) Il ROP si basa su sequenze anomale di \lstinline|ret|: sono stati proposti rilevatori ``return-less'' che osservano proprio questo (troppi blocchi che finiscono con \lstinline|ret|, troppi \lstinline|ret| verso lo stack). Il JOP è la risposta dell'attaccante: una catena di riuso di codice che \emph{non usa} \lstinline|ret|.\\
+(b) Come il ROP è una catena di gadget, ma ogni gadget termina con un \textbf{salto indiretto} (\lstinline|jmp *reg|), non con \lstinline|ret|. Gli indirizzi dei gadget stanno in una \textbf{dispatch table} (un'area dati qualsiasi: stack, heap, globali); un \textbf{dispatcher gadget} fa avanzare un puntatore nella tabella e salta al gadget successivo; ogni gadget funzionale ritorna il controllo al dispatcher con un \lstinline|jmp| indiretto. Il dispatcher è il ``motore'' della catena, al posto del \lstinline|ret|.\\
+(c) Nel ROP il ``program counter'' della catena è \textbf{ESP} + \lstinline|ret|; nel JOP è \textbf{EIP + un registro} (o una locazione) guidato dal dispatcher $\to$ stesso risultato, ma invisibile ai rilevatori dei \lstinline|ret|. Nota: su alcune architetture (es.\ ARM64) il JOP è più ``naturale'', perché usa salti a registro (\lstinline|br|/\lstinline|blr|). La risposta di fondo a ROP e JOP è la \textbf{CFI}.
+\end{solution}

@@ -1,0 +1,8 @@
+\question[6]
+Lab NX (es.\ 12). Lo stesso sorgente con \lstinline|void vulnerable(){ char name[64]; read(0,name,300); ... }| viene compilato due volte: \lstinline|vuln-nx-off| (\lstinline|-z execstack|) e \lstinline|vuln-nx-on| (\lstinline|-z noexecstack|); si lancia lo \emph{stesso} exploit di shellcode injection contro entrambi.
+(a) Perché \lstinline|read(0, name, 300)| è vulnerabile? (b) Qual è l'esito contro i due binari e perché? (c) Che cosa dimostra questo confronto?
+\begin{solution}
+(a) \lstinline|name[64]| ma \lstinline|read| ne accetta fino a 300: nessun controllo di lunghezza $\to$ overflow che sovrascrive saved EBP e return address.\\
+(b) L'exploit inietta lo shellcode nello stack e vi dirotta il flusso. Contro \lstinline|vuln-nx-off| lo stack è eseguibile $\to$ lo shellcode gira: \textbf{shell}. Contro \lstinline|vuln-nx-on| lo stack è \emph{non} eseguibile (W\^{}X) $\to$ la CPU rifiuta di eseguire quei byte: \textbf{SIGSEGV}.\\
+(c) Che la \emph{sola} differenza NX on/off decide l'esito: NX neutralizza l'\emph{iniezione} di codice. (Non il riuso: cfr.\ lab ret2libc/ROP/JOP, dove NX è irrilevante.)
+\end{solution}

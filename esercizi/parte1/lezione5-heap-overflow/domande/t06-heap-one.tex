@@ -1,0 +1,6 @@
+\question[5]
+L'esempio 17 (\lstinline|heap-one|) ha la \emph{stessa} vulnerabilità su Phoenix e sulla vulnbox moderna, ma esito opposto: exploit riuscito su Phoenix, solo crash sulla vulnbox. (a) Perché su Phoenix funziona e sulla vulnbox no? (b) Che cosa ci insegna in generale sugli attacchi all'heap?
+\begin{solution}
+(a) La sfruttabilità dipende dal \textbf{layout di memoria}. Su \textbf{Phoenix} l'\textbf{ASLR è off}: heap e stack sono a indirizzi \emph{fissi e noti}, quindi una volta trovato l'indirizzo del return address resta stabile e l'exploit è riproducibile. Sulla \textbf{vulnbox moderna} l'\textbf{ASLR è on} e, soprattutto, heap e stack distano \emph{oltre 1\,GB}: il puntatore sovrascritto non raggiunge in modo affidabile il return address $\to$ si ottiene solo un crash. Non è un limite dell'emulazione, ma una differenza strutturale di layout tra il kernel della VM Phoenix (${\sim}2011$) e i kernel Linux moderni.\\
+(b) Che un overflow sull'heap, da solo, non basta: l'esito dipende da \emph{dove} finiscono i dati e i puntatori in memoria. La stessa riga di codice vulnerabile può essere sfruttabile o innocua a seconda dell'ambiente (allocatore, architettura, ASLR, distanza heap/stack). È il motivo per cui gli attacchi all'heap sono molto più dipendenti dal contesto di quelli sullo stack.
+\end{solution}

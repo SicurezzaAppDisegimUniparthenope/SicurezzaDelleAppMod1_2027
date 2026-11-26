@@ -1,0 +1,7 @@
+\question[6]
+``Un gioco del gatto e del topo'': ogni contromisura nasce contro un attacco e ogni attacco evolve per aggirarla. (a) Associa a NX, canary e ASLR la risposta tipica dell'attaccante. (b) Che cosa si intende con \emph{difesa in profondità} e qual è la difesa più ``definitiva''? (c) Cita almeno due difese moderne (cenni) e che cosa colpiscono.
+\begin{solution}
+(a) \textbf{NX} (contro la shellcode injection) $\to$ l'attaccante risponde con il \emph{riuso di codice} (ret2libc / ROP / JOP). \textbf{Canary} (rende ``rumorosa'' la corruzione del return address) $\to$ \emph{information leak} o \emph{brute force}. \textbf{ASLR} (indirizzi imprevedibili) $\to$ \emph{information leak}.\\
+(b) Nessuna contromisura, da sola, è risolutiva: ciascuna chiude una porta e ne lascia altre aperte. NX + canary + ASLR + buone pratiche = \textbf{difesa in profondità}, che alza molto il costo dell'attacco. La difesa più ``definitiva'' resta \emph{eliminare la vulnerabilità alla radice} (controllo delle dimensioni, API sicure, \lstinline|printf("%s", input)|).\\
+(c) \textbf{CFI} (Control-Flow Integrity): vincola salti/ritorni indiretti a un CFG calcolato staticamente $\to$ colpisce alla radice ROP e JOP. \textbf{RELRO}: rende la GOT di sola lettura $\to$ ostacola la GOT overwrite. \textbf{Shadow stack / Intel CET}: copia protetta dei return address, rileva la corruzione dello stack. (Anche: stack protector ``strong'', FORTIFY\_SOURCE, PIE + ASLR completo, per default nelle distribuzioni moderne.)
+\end{solution}

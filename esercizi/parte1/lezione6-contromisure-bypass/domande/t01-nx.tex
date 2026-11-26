@@ -1,0 +1,7 @@
+\question[6]
+La protezione \textbf{NX} (Non-eXecutable stack, W\^{}X / DEP). (a) Qual è il principio e quale passo del modello di code injection interrompe? (b) Come si verifica se è attiva in un binario ELF e con quale flag del compilatore si sceglie? (c) Qual è il suo limite fondamentale?
+\begin{solution}
+(a) Principio \textbf{W\^{}X} (\emph{Write XOR eXecute} / DEP): una pagina può essere scrivibile \emph{oppure} eseguibile, mai entrambe. Stack e heap sono marcati \textbf{non eseguibili}, con supporto hardware (bit NX/XD del processore gestito per pagina dall'OS). Spezza il secondo passo del code injection: i byte dello shellcode iniettati nello stack \emph{non possono più essere eseguiti} (SIGSEGV).\\
+(b) Nel binario ELF il segmento \lstinline|GNU_STACK| porta i permessi del futuro stack: \lstinline|RWE| $\to$ stack eseguibile (NX off), \lstinline|RW| $\to$ non eseguibile (NX on). Strumenti: \lstinline|readelf -l|, \lstinline|pwn checksec|, \lstinline|ELF(...).execstack|. Compilatore: \lstinline|gcc -z execstack| vs \lstinline|-z noexecstack|.\\
+(c) NX ferma l'\emph{iniezione} di codice, ma \emph{non} il \textbf{riuso} di codice già presente ed eseguibile: return-to-libc (salta a \lstinline|system|), ROP/JOP (concatena frammenti esistenti). In questi casi non si esegue nulla nelle pagine scrivibili $\to$ NX è irrilevante.
+\end{solution}

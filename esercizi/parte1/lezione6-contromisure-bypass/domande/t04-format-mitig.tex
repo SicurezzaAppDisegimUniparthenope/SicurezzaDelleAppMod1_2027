@@ -1,0 +1,7 @@
+\question[5]
+La \textbf{mitigazione delle format string} (richiamo Lez.\ 4). (a) Qual è la radice della vulnerabilità e la regola d'oro per eliminarla? (b) Quali difese aggiunge il compilatore? (c) Perché questa correzione è più ``definitiva'' di NX o ASLR?
+\begin{solution}
+(a) La radice \emph{non} è \lstinline|printf|, ma passargli input non fidato come \textbf{prima} stringa (il formato): \lstinline|printf(buf)| con \lstinline|buf| controllato dall'utente permette \lstinline|%x|/\lstinline|%p|/\lstinline|%s| (lettura di memoria) e \lstinline|%n| (scrittura, write-what-where). Regola d'oro: \emph{mai} passare input non fidato come format string; usare \lstinline|printf("%s", buf)|, così l'input diventa un semplice argomento e \lstinline|%n|, \lstinline|%7$x| ecc.\ vengono stampati alla lettera, mai interpretati. Correzione minima, costo nullo.\\
+(b) \lstinline|-Wformat| / \lstinline|-Wformat-security| segnalano \lstinline|printf(buf)| senza argomenti variabili; \lstinline|FORTIFY_SOURCE| (\lstinline|-D_FORTIFY_SOURCE=2|) sostituisce \lstinline|printf| con varianti \lstinline|_chk| che rifiutano \lstinline|%n| verso memoria scrivibile; analisi statica/linting individuano l'uso pericoloso. Sono \emph{complementari} alla regola (difesa in profondità).\\
+(c) Perché \emph{elimina la vulnerabilità alla radice} invece di ostacolarne lo sfruttamento: NX e ASLR alzano solo il costo dell'attacco e hanno bypass noti, mentre \lstinline|printf("%s", input)| rende il payload semplicemente inerte (stampato, mai interpretato).
+\end{solution}

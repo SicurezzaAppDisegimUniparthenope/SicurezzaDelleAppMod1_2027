@@ -1,0 +1,8 @@
+\question[6]
+Lab mitigazione format string (es.\ 15). Il programma legge \lstinline|buf| e ha una \lstinline|flag| globale (obiettivo: renderla $\neq 0$). Due build dallo stesso sorgente: \lstinline|vuln-format-off| usa \lstinline|printf(buf)|, \lstinline|vuln-format-on| usa \lstinline|printf("%s", buf)| (via \lstinline|-DSAFE|). Si invia lo \emph{stesso} payload con \lstinline|%n|.
+(a) Qual è l'esito contro i due binari? (b) Perché \lstinline|printf("%s", buf)| neutralizza il payload? (c) In che senso è una correzione ``alla radice''?
+\begin{solution}
+(a) Contro \lstinline|vuln-format-off|: \lstinline|printf(buf)| interpreta l'input come format string, \lstinline|%n| \emph{scrive} in memoria $\to$ \textbf{flag corrotta} ($\neq 0$, ``hai corrotto la memoria''). Contro \lstinline|vuln-format-on|: il payload viene \textbf{solo stampato} alla lettera $\to$ \lstinline|flag| resta 0.\\
+(b) Con \lstinline|printf("%s", buf)| l'input è un \emph{argomento}, non la stringa di formato: non contiene più direttive da interpretare, quindi \lstinline|%n|/\lstinline|%x| vengono trattati come testo normale. Nessuna lettura/scrittura di memoria.\\
+(c) Perché rimuove la \emph{causa} (passare input non fidato come formato) invece di ostacolare lo sfruttamento: a differenza di NX/ASLR non c'è un bypass: il payload diventa inerte. Costo prestazionale nullo.
+\end{solution}
