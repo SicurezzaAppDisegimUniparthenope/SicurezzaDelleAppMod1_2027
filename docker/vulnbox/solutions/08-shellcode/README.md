@@ -69,43 +69,42 @@ anche nel processo successivo — stesso compromesso adottato in
 praticabile su questi binari). Shellcode generato con
 `shellcraft.amd64.linux.sh()`.
 
-## Variante host x86_64 nativo (`exploit-native.py`, `~student/bin/i386/shellcode`)
+## Due ambienti, un solo script (QEMU **e** host x86_64 nativo)
 
-`exploit.py` (come `exploit-x64.py`) trova l'offset da `p.corefile`: funziona
-**solo sotto QEMU user-mode**, dove è QEMU a scrivere un `core.<pid>` nella cwd
-— proprio dove pwntools lo cerca. Su un **host x86_64 nativo** (es. `bruand81.it`,
-vedi `docker/vulnbox/REMOTE.md`) i binari girano senza emulazione, quindi decide
-il kernel dell'host: `core_pattern` è tipicamente una **pipe** (su Ubuntu
-`|/usr/share/apport/apport …`), nessun file compare nella cwd e `p.corefile`
-fallisce con *"Could not find core file"*. Non è aggirabile con `ulimit -c` né
-cambiando `core_pattern` dal container (è del kernel host, non namespaced — stesso
-muro della variante arm64).
+`find_offset_and_shellcode_addr()` prova prima `p.corefile` e, se fallisce,
+ripiega su `gdb` allegato al processo. Così lo **stesso** `exploit.py` /
+`exploit-x64.py` funziona in entrambi gli ambienti, senza file separati:
 
-`exploit-native.py` usa quindi lo stesso schema di `exploit-arm64.py`: **niente
-corefile**, si allega `gdb` al processo già lanciato da pwntools e si leggono
-`$eip`/`$esp`. Due accortezze specifiche:
+- **Sotto QEMU user-mode** (host arm64) è QEMU a scrivere un `core.<pid>`
+  nella cwd — proprio dove pwntools lo cerca. gdb *live* lì non funziona
+  (ptrace non supportato), ma il corefile basta.
+- **Su host x86_64 nativo** (es. `bruand81.it`, vedi
+  `docker/vulnbox/REMOTE.md`) decide il kernel dell'host: `core_pattern` è una
+  **pipe** (`|…systemd-coredump`/`apport`), nessun file compare nella cwd e
+  `p.corefile` fallisce con *"Could not find core file"* (non aggirabile dal
+  container: è del kernel host, non namespaced). Scatta il fallback gdb, che
+  legge `$eip`/`$esp` allegandosi al processo già lanciato da pwntools con
+  `gdb -nx` (il GEF del container ha un init lento abbastanza da far crashare
+  il processo prima che l'attach si completi). Verificato su `bruand81.it`:
+  `offset = 76` (coerente con `name[64]`), shell con `uid=1000(student)`.
 
-- **`gdb -nx`**: il gdb del container ha GEF, il cui init è lento abbastanza da
-  far crashare il processo *prima* che l'attach si completi (`Unable to attach:
-  program terminated`). `-nx` salta i file di init e rende l'attach immediato.
-- **`context.aslr = False`**: su host nativo l'ASLR randomizza davvero lo stack
-  (sotto QEMU no — per questo `exploit.py` non ne aveva bisogno), quindi
-  l'indirizzo "usa e getta" va reso stabile tra i due lanci (stessa scelta di
-  `exploit-x64.py`/`exploit-arm64.py`).
+**`context.aslr = False`** è ora impostato sempre (anche nella variante i386):
+l'indirizzo di stack "usa e getta" va reso stabile tra i due lanci. Su host
+nativo l'ASLR randomizza davvero lo stack; sotto QEMU i386 non randomizza (per
+cui prima funzionava "per caso"), quindi disabilitarlo è innocuo lì. Su un host
+nativo con ASLR *realmente* attiva questa scorciatoia non basterebbe:
+servirebbe un vero gadget `jmp esp` risolto per ogni run (vedi i commenti di
+`exploit.py`).
 
-Verificato su `bruand81.it`: `offset = 76` (coerente con `name[64]`), shell con
-`uid=1000(student)`. Su host nativo con ASLR *realmente* attiva servirebbe invece
-un vero gadget `jmp esp` risolto per ogni run (vedi i commenti di `exploit.py`).
-
-La versione a 64 bit è `exploit-x64-native.py` (`~student/bin/x64/shellcode`),
-con una finezza amd64 in più: un `ret` verso un indirizzo **non canonico** (gli
-8 byte di cyclic) fa faultare la CPU sull'istruzione `ret` stessa, *prima* di
-committare il pop. Due conseguenze, entrambe sfruttate: l'offset si legge da
-`*(unsigned long *)$rsp` (il return address corrotto è ancora in cima allo stack),
-e `$rsp` punta ancora **allo** slot del return address (non "subito dopo", come
-col corefile QEMU dove la pop era già avvenuta), quindi lo shellcode — che nel
-payload sta dopo il return address — si trova a `$rsp + 8`. Verificato su
-`bruand81.it`: shell con `uid=1000(student)`.
+Finezza amd64 (`exploit-x64.py`), sfruttata dal ramo gdb: un `ret` verso un
+indirizzo **non canonico** (gli 8 byte di cyclic) fa faultare la CPU
+sull'istruzione `ret` stessa, *prima* di committare il pop. Due conseguenze:
+l'offset si legge da `*(unsigned long *)$rsp` (il return address corrotto è
+ancora in cima allo stack), e `$rsp` punta ancora **allo** slot del return
+address (non "subito dopo", come col corefile QEMU dove la pop era già
+avvenuta), quindi lo shellcode — che nel payload sta dopo il return address —
+si trova a `$rsp + 8`. Verificato su `bruand81.it`: shell con
+`uid=1000(student)`.
 
 ## Variante arm64 (`exploit-arm64.py`, `~student/bin/arm64/shellcode`)
 

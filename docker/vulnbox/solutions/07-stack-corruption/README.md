@@ -34,33 +34,38 @@ pwntools sulla ricerca de Bruijn con alfabeto a 8 byte); si usa il
 default `n=4` sui primi 4 byte di RIP, sufficiente a un offset univoco
 (pwntools stampa un warning informativo, atteso e innocuo).
 
-## Variante host x86_64 nativo (`exploit-native.py`, `~student/bin/i386/corruption`)
+## Due ambienti, un solo script (QEMU **e** host x86_64 nativo)
 
-`exploit.py` trova l'offset da `p.corefile`: funziona **solo sotto QEMU
-user-mode**, dove è QEMU a scrivere un `core.<pid>` nella cwd. Su un **host
-x86_64 nativo** (es. `bruand81.it`, vedi `docker/vulnbox/REMOTE.md`) i binari
-girano senza emulazione: `core_pattern` è tipicamente una **pipe** (su Ubuntu
-`|/usr/share/apport/apport …`), nessun file compare nella cwd e `p.corefile`
-fallisce con *"Could not find core file"* (non aggirabile dal container:
-core_pattern è del kernel host, non namespaced — stesso muro della variante
-arm64).
+`find_offset()` prova prima `p.corefile` e, se fallisce, ripiega su `gdb`
+allegato al processo (`-ex continue`). Così lo **stesso** `exploit.py` /
+`exploit-x64.py` funziona in entrambi gli ambienti, senza file separati:
 
-`exploit-native.py` legge quindi `$eip` allegando `gdb` al processo già lanciato
-da pwntools, come in `exploit-arm64.py`, con `gdb -nx` (il GEF del container ha
-un init lento abbastanza da far crashare il processo prima che l'attach si
-completi). A differenza di `08-shellcode` **non** serve `context.aslr = False`:
-qui l'unico indirizzo usato (`highSecurityFunction`) viene dall'ELF `-no-pie` ed
-è fisso, e l'offset è invariante rispetto all'ASLR. Verificato su `bruand81.it`:
-`offset = 32` (coerente con `buffer[20]`), stampa "TOP SECRET".
+- **Sotto QEMU user-mode** (host arm64) è QEMU a scrivere un `core.<pid>`
+  nella cwd e `p.corefile` lo trova. gdb *live* lì non funziona (ptrace non
+  supportato sotto QEMU user-mode), ma non serve: il corefile basta.
+- **Su host x86_64 nativo** (es. `bruand81.it`, vedi
+  `docker/vulnbox/REMOTE.md`) i binari girano senza emulazione: `core_pattern`
+  è tipicamente una **pipe** (`|…systemd-coredump`/`apport`), nessun file
+  compare nella cwd e `p.corefile` fallisce con *"Could not find core file"*
+  (non aggirabile dal container: `core_pattern` è del kernel host, non
+  namespaced). Scatta allora il fallback gdb, con `gdb -nx` (il GEF del
+  container ha un init lento abbastanza da far crashare il processo prima che
+  l'attach si completi). gdb live funziona nativo. Verificato su `bruand81.it`:
+  `offset = 32` (coerente con `buffer[20]`), stampa "TOP SECRET".
 
-La versione a 64 bit è `exploit-x64-native.py` (`~student/bin/x64/corruption`),
-con una finezza amd64 in più: un `ret` verso un indirizzo **non canonico** (gli
-8 byte di cyclic) fa faultare la CPU sull'istruzione `ret` stessa, *prima* di
-committare il pop — quindi `$pc` resta sul `ret` e non contiene il pattern (sotto
-QEMU il corefile invece lo conteneva). Il return address corrotto è però ancora
-in cima allo stack, quindi l'offset si legge da `*(unsigned long *)$rsp` (troncato
-a 4 byte da `cyclic_find`, come in `exploit-x64.py`: `n=8` va in hang). Verificato
-su `bruand81.it`: stampa "TOP SECRET".
+Qui l'unico indirizzo usato (`highSecurityFunction`) viene dall'ELF `-no-pie`
+ed è fisso, e l'offset è invariante rispetto all'ASLR: non serve
+`context.aslr = False` (a differenza di `08-shellcode`, che riusa un indirizzo
+di stack).
+
+Finezza amd64 (`exploit-x64.py`), sfruttata dal ramo gdb: un `ret` verso un
+indirizzo **non canonico** (gli 8 byte di cyclic) fa faultare la CPU
+sull'istruzione `ret` stessa, *prima* di committare il pop — quindi `$pc` resta
+sul `ret` e non contiene il pattern (sotto QEMU il corefile invece lo
+conteneva, perché emulava la pop). Il return address corrotto è però ancora in
+cima allo stack, quindi l'offset si legge da `*(unsigned long *)$rsp` (troncato
+a 4 byte da `cyclic_find`: `n=8` va in hang). Verificato su `bruand81.it`:
+stampa "TOP SECRET".
 
 ## Variante arm64 (`exploit-arm64.py`, `~student/bin/arm64/corruption`)
 

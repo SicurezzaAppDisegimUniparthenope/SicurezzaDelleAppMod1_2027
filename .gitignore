@@ -42,3 +42,7 @@ qemu_*.core
 Claude outputs/esame.pdf
 .gitignore
 Claude outputs/soluzioni.pdf
+
+# Python bytecode cache (es. da py_compile sulle solutions)
+__pycache__/
+*.pyc
